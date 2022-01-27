@@ -8,8 +8,8 @@ NdShape* NdShape_empty(unsigned int dim) {
     NdShape *ndshape = (NdShape*)malloc(sizeof(NdShape));
     ndshape->dim = dim;
     ndshape->len = 1;
-    ndshape->shape = (unsigned int*)malloc(sizeof(unsigned int) * dim);
-    memset(ndshape->shape, 0, sizeof(unsigned int) * dim);
+    ndshape->arr = (unsigned int*)malloc(sizeof(unsigned int) * dim);
+    memset(ndshape->arr, 0, sizeof(unsigned int) * dim);
     return ndshape;
 }
 
@@ -22,7 +22,7 @@ NdShape* NdShape_set(NdShape *ndshape, unsigned int dim, ...) {
     va_start(ap, dim);
     for(int i = 0; i < dim; i++) {
         int temp = va_arg(ap, int);
-        ndshape->shape[i] = temp;
+        ndshape->arr[i] = temp;
         ndshape->len *= temp;
     }
     va_end(ap);
@@ -35,7 +35,7 @@ NdShape* NdShape_new(unsigned int dim, ...) {
     va_start(ap, dim);
     for(int i = 0; i < dim; i++) {
         int temp = va_arg(ap, int);
-        ndshape->shape[i] = temp;
+        ndshape->arr[i] = temp;
         ndshape->len *= temp;
     }
     va_end(ap);
@@ -45,23 +45,23 @@ NdShape* NdShape_new(unsigned int dim, ...) {
 NdShape* NdShape_copy(const NdShape *src) {
     NdShape *dest = NdShape_empty(src->dim);
     for(int i = 0; i < src->dim; i++) {
-        dest->shape[i] = src->shape[i];
-        dest->len *= src->shape[i];
+        dest->arr[i] = src->arr[i];
+        dest->len *= src->arr[i];
     }
     return dest;
 }
 
 void NdShape_free(NdShape **ptrshape) {
-    free((*ptrshape)->shape);
+    free((*ptrshape)->arr);
     free(*ptrshape);
-    (*ptrshape)->shape = NULL;
+    (*ptrshape)->arr= NULL;
     *ptrshape= NULL;
 }
 
 void NdShape_print(NdShape *ndshape) {
     printf("( ");
     for(int i = 0; i < ndshape->dim; i++) {
-        printf("%d", ndshape->shape[i]);
+        printf("%d", ndshape->arr[i]);
         if(i < ndshape->dim-1) {
             printf(", ");
         }
@@ -79,7 +79,7 @@ int NdShape_compare(NdShape *a, NdShape *b) {
     }
 
     for(int i = 0; i < a->dim; i++) {
-        if(a->shape[i] != b->shape[i]) {
+        if(a->arr[i] != b->arr[i]) {
             return 0;
         }
     }
@@ -89,7 +89,7 @@ int NdShape_compare(NdShape *a, NdShape *b) {
 
 int NdShape_reshape(NdShape *dest, const NdShape *src) {
     if(dest->len != src->len) {
-        fprintf(stderr, "lengthes of both must be same.");
+        fprintf(stderr, "lengthes of both must be same. (%d %d)\n", dest->len, src->len);
         return 0;
     }
 

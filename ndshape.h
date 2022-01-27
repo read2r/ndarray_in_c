@@ -4,14 +4,14 @@
 typedef struct tagNdShape {
     unsigned int dim;
     unsigned int len;
-    unsigned int *shape;
+    unsigned int *arr;
 } NdShape;
 
 NdShape* NdShape_empty(unsigned int dim);
 NdShape* NdShape_set(NdShape *ndarray, unsigned int dim, ...);
 NdShape* NdShape_new(unsigned int dim, ...);
 NdShape* NdShape_copy(const NdShape *src);
-void NdShape_free(NdShape **ndshape);
+void NdShape_free(NdShape **ptr_ndshape);
 void NdShape_print(NdShape *ndshape);
 int NdShape_compareDimension(NdShape *a, NdShape *b);
 int NdShape_compareLength(NdShape *a, NdShape *b);
