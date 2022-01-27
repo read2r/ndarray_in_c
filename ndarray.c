@@ -176,28 +176,117 @@ int NdArray_mod(NdArray *dest, NdArray *src) {
     return 1;
 }
 
-void NdArray_scalarAdd(NdArray *ndarray, int value) {
+void dot_recursive(NdArray *result, NdArray *a, NdArray *b, unsigned int *position, unsigned int dim) {
+}
+
+NdArray* NdArray_dot(NdArray *a, NdArray *b) {
+    NdArray *result;
+    NdShape *shape_result;
+    NdShape *shape_a = a->shape;
+    NdShape *shape_b = b->shape;
+
+    if(shape_a->dim != shape_b->dim) {
+        return NULL;
+    }
+
+    if(shape_a->arr[shape_a->dim-1] != shape_b->arr[shape_b->dim-2]) {
+        return NULL;
+    }
+
+    shape_result = NdShape_empty(shape_a->dim + shape_b->dim - 2);
+    memcpy(shape_result->arr, shape_a->arr, sizeof(unsigned int) * shape_a->dim);
+
+    return result; 
+}
+
+void matmul_recursive(NdArray *result, NdArray *a, NdArray *b, unsigned int *position, unsigned int dim) {
+    NdShape *shape_result = result->shape;
+
+    if(dim >= shape_result->dim) {
+        NdShape *shape_a = a->shape;
+        NdShape *shape_b = b->shape;
+
+        unsigned int *position_a = (unsigned int*)malloc(sizeof(unsigned int) * dim);
+        unsigned int *position_b = (unsigned int*)malloc(sizeof(unsigned int) * dim);
+        
+        memcpy(position_a, position, sizeof(unsigned int) * dim);
+        memcpy(position_b, position, sizeof(unsigned int) * dim);
+
+        int value_a, value_b;
+        int value_result = 0;
+        for(int i = 0; i < shape_a->arr[shape_a->dim-1]; i++) {
+            position_a[dim-1] = i;
+            position_b[dim-2] = i;
+
+            value_a = NdArray_getAt(a, position_a);
+            value_b = NdArray_getAt(b, position_b);
+            value_result += value_a * value_b;
+        }
+        NdArray_setAt(result, position, &value_result);
+
+        return;
+    }
+
+    for(int i = 0; i < shape_result->arr[dim]; i++) {
+        position[dim] = i;
+        matmul_recursive(result, a, b, position, dim+1);
+    }
+}
+
+NdArray* NdArray_matmul(NdArray *a, NdArray *b) {
+    NdArray *result;
+    NdShape *shape_result;
+    NdShape *shape_a = a->shape;
+    NdShape *shape_b = b->shape;
+
+    if(shape_a->dim != shape_b->dim) {
+        return NULL;
+    }
+
+    if(shape_a->arr[shape_a->dim-1] != shape_b->arr[shape_b->dim-2]) {
+        return NULL;
+    }
+
+    for(int i = 0; i < shape_a->dim-2; i++) {
+        if(shape_a->arr[i] != shape_b->arr[i]) {
+            return NULL;
+        }
+    }
+
+    shape_result = NdShape_copy(shape_a);
+    shape_result->arr[shape_result->dim-1] = shape_b->arr[shape_b->dim-1];
+    result = NdArray_new(NULL, shape_result);
+
+    unsigned int *position = (unsigned int*)malloc(result->size);
+    memset(position, 0, result->size);
+    
+    matmul_recursive(result, a, b, position, 0);
+
+    return result;
+}
+
+void NdArray_add_scalar(NdArray *ndarray, int value) {
     int *data = (int*)ndarray->data;
     for(int i = 0; i < ndarray->shape->len; i++) {
         data[i] += value;
     }
 }
 
-void NdArray_scalarSub(NdArray *ndarray, int value) {
+void NdArray_sub_scalar(NdArray *ndarray, int value) {
     int *data = (int*)ndarray->data;
     for(int i = 0; i < ndarray->shape->len; i++) {
         data[i] -= value;
     }
 }
 
-void NdArray_scalarMul(NdArray *ndarray, int value) {
+void NdArray_mul_scalar(NdArray *ndarray, int value) {
     int *data = (int*)ndarray->data;
     for(int i = 0; i < ndarray->shape->len; i++) {
         data[i] *= value;
     }
 }
 
-void NdArray_scalarDiv(NdArray *ndarray, int value) {
+void NdArray_div_scalar(NdArray *ndarray, int value) {
     assert(value != 0);
     int *data = (int*)ndarray->data;
     for(int i = 0; i < ndarray->shape->len; i++) {
@@ -205,7 +294,7 @@ void NdArray_scalarDiv(NdArray *ndarray, int value) {
     }
 }
 
-void NdArray_scalarMod(NdArray *ndarray, int value) {
+void NdArray_mod_scalar(NdArray *ndarray, int value) {
     assert(value != 0);
     int *data = (int*)ndarray->data;
     for(int i = 0; i < ndarray->shape->len; i++) {

@@ -121,12 +121,37 @@ void test_ndarray_get_set() {
     NdArray_printArray(array);
 }
 
+void test_ndarray_matmul() {
+    NdShape *shape = NdShape_new(2, 2, 2);
+    NdArray *array = NdArray_arange(1,5);
+    NdArray_reshape(array, shape);
+
+    NdArray *result = NdArray_matmul(array, array);
+    NdArray_printShape(result);
+    NdArray_printArray(result);
+    NdArray_free(&result);
+
+    NdShape *shape0 = NdShape_new(5, 2, 3, 4, 5, 6);
+    NdShape *shape1 = NdShape_new(5, 2, 3, 4, 6, 7);
+
+    NdArray *array0 = NdArray_arange(1, 721);
+    NdArray *array1 = NdArray_arange(1, 1009);
+
+    NdArray_reshape(array0, shape0);
+    NdArray_reshape(array1, shape1);
+    
+    result = NdArray_matmul(array0, array1);
+    NdArray_printArray(result);
+    NdArray_printShape(result);
+}
+
 int main() {
-    test("test_ndarray_new", test_ndarray_new);
-    test("test_ndarray_new_with_data", test_ndarray_new_with_data);
-    test("test_ndarray_copy", test_ndarray_copy);
-    test("test_ndarray_aranges", test_ndarray_aranges);
-    test("test_ndarray_reshape", test_ndarray_reshape);
-    test("test_ndarray_get_set", test_ndarray_get_set);
+    //test("test_ndarray_new", test_ndarray_new);
+    //test("test_ndarray_new_with_data", test_ndarray_new_with_data);
+    //test("test_ndarray_copy", test_ndarray_copy);
+    //test("test_ndarray_aranges", test_ndarray_aranges);
+    //test("test_ndarray_reshape", test_ndarray_reshape);
+    //test("test_ndarray_get_set", test_ndarray_get_set);
+    test("test_ndarray_matmul", test_ndarray_matmul);
     return 0;
 }

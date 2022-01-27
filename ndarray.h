@@ -39,19 +39,21 @@ void NdArray_setAt(NdArray *ndarray, unsigned int *position, void* data);
 void NdArray_printArray(NdArray *ndarray);
 void NdArray_printShape(NdArray *ndarray);
 
-// vector & matrix operations
+// array & matrix operations
 int NdArray_add(NdArray *dest, NdArray *src);
 int NdArray_sub(NdArray *dest, NdArray *src);
 int NdArray_mul(NdArray *dest, NdArray *src);
 int NdArray_div(NdArray *dest, NdArray *src);
 int NdArray_mod(NdArray *dest, NdArray *src);
+NdArray* NdArray_dot(NdArray *a, NdArray *b);
+NdArray* NdArray_matmul(NdArray *a, NdArray *b);
 int NdArray_transpose(NdArray *ndarray); // Not yet implemented
 
 // scalar operations
-void NdArray_scalarAdd(NdArray *ndarray, int value);
-void NdArray_scalarSub(NdArray *ndarray, int value);
-void NdArray_scalarMul(NdArray *ndarray, int value);
-void NdArray_scalarDiv(NdArray *ndarray, int value);
-void NdArray_scalarMod(NdArray *ndarray, int value);
+void NdArray_add_scalar(NdArray *ndarray, int value);
+void NdArray_sub_scalar(NdArray *ndarray, int value);
+void NdArray_mul_scalar(NdArray *ndarray, int value);
+void NdArray_div_scalar(NdArray *ndarray, int value);
+void NdArray_mod_scalar(NdArray *ndarray, int value);
 
 #endif
