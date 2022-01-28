@@ -177,6 +177,38 @@ int NdArray_mod(NdArray *dest, NdArray *src) {
 }
 
 void dot_recursive(NdArray *result, NdArray *a, NdArray *b, unsigned int *position, unsigned int dim) {
+    NdShape *shape_result = result->shape;
+
+    if(dim >= shape_result->dim) {
+        NdShape *shape_a = a->shape;
+        NdShape *shape_b = b->shape;
+
+        unsigned int *position_a = (unsigned int*)malloc(sizeof(unsigned int) * shape_a->dim);
+        unsigned int *position_b = (unsigned int*)malloc(sizeof(unsigned int) * shape_b->dim);
+
+        memcpy(position_a, position, sizeof(unsigned int) * (shape_a->dim-1));
+        memcpy(position_b, position + (shape_a->dim-1), sizeof(unsigned int) * (shape_b->dim-1));
+        position_b[shape_b->dim-1] = position_b[shape_b->dim-2];
+
+        int value_a, value_b;
+        int value_result = 0;
+        for(int i = 0; i < shape_a->arr[shape_a->dim-1]; i++) {
+            position_a[shape_a->dim-1] = i;
+            position_b[shape_b->dim-2] = i;
+
+            value_a = NdArray_getAt(a, position_a);
+            value_b = NdArray_getAt(b, position_b);
+            value_result += value_a * value_b;
+        }
+        NdArray_setAt(result, position, &value_result);
+
+        return;
+    }
+
+    for(int i = 0; i < shape_result->arr[dim]; i++) {
+        position[dim] = i;
+        dot_recursive(result, a, b, position, dim+1);
+    }
 }
 
 NdArray* NdArray_dot(NdArray *a, NdArray *b) {
@@ -194,8 +226,21 @@ NdArray* NdArray_dot(NdArray *a, NdArray *b) {
     }
 
     shape_result = NdShape_empty(shape_a->dim + shape_b->dim - 2);
-    memcpy(shape_result->arr, shape_a->arr, sizeof(unsigned int) * shape_a->dim);
+    memcpy(shape_result->arr, shape_a->arr, sizeof(unsigned int) * (shape_a->dim-1));
+    memcpy(shape_result->arr + (shape_a->dim-1), shape_b->arr, sizeof(unsigned int) * (shape_b->dim-1));
+    shape_result->arr[shape_result->dim-1] = shape_b->arr[shape_b->dim-1];
 
+    for(int i = 0; i < shape_result->dim; i++) {
+        shape_result->len *= shape_result->arr[i];
+    }
+
+    result = NdArray_new(NULL, shape_result);
+
+    unsigned int *position = (unsigned int*)malloc(sizeof(unsigned int) * shape_result->dim);
+    memset(position, 0, sizeof(unsigned int) * shape_result->dim);
+
+    dot_recursive(result, a, b, position, 0);
+    
     return result; 
 }
 
@@ -206,11 +251,11 @@ void matmul_recursive(NdArray *result, NdArray *a, NdArray *b, unsigned int *pos
         NdShape *shape_a = a->shape;
         NdShape *shape_b = b->shape;
 
-        unsigned int *position_a = (unsigned int*)malloc(sizeof(unsigned int) * dim);
-        unsigned int *position_b = (unsigned int*)malloc(sizeof(unsigned int) * dim);
+        unsigned int *position_a = (unsigned int*)malloc(sizeof(unsigned int) * shape_a->dim);
+        unsigned int *position_b = (unsigned int*)malloc(sizeof(unsigned int) * shape_b->dim);
         
-        memcpy(position_a, position, sizeof(unsigned int) * dim);
-        memcpy(position_b, position, sizeof(unsigned int) * dim);
+        memcpy(position_a, position, sizeof(unsigned int) * shape_a->dim);
+        memcpy(position_b, position, sizeof(unsigned int) * shape_b->dim);
 
         int value_a, value_b;
         int value_result = 0;
@@ -257,8 +302,8 @@ NdArray* NdArray_matmul(NdArray *a, NdArray *b) {
     shape_result->arr[shape_result->dim-1] = shape_b->arr[shape_b->dim-1];
     result = NdArray_new(NULL, shape_result);
 
-    unsigned int *position = (unsigned int*)malloc(result->size);
-    memset(position, 0, result->size);
+    unsigned int *position = (unsigned int*)malloc(sizeof(unsigned int) * shape_result->dim);
+    memset(position, 0, shape_result->dim);
     
     matmul_recursive(result, a, b, position, 0);
 
