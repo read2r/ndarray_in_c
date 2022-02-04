@@ -5,10 +5,25 @@
 #include "ndarray.h"
 #include "ndshape.h"
 
-NdArray* NdArray_new(void *data, NdShape *ndshape) {
+size_t get_item_size(DataType datatype) {
+    switch(datatype) {
+    case DT_INT:
+        return sizeof(int);
+        break;
+    case DT_DOUBLE:
+        return sizeof(double);
+        break;
+    default:
+        return -1;
+    }
+}
+
+NdArray* NdArray_new(void *data, NdShape *ndshape, DataType datatype) {
     NdArray *ndarray = (NdArray*)malloc(sizeof(NdArray));
     ndarray->shape = NdShape_copy(ndshape);
-    ndarray->size = sizeof(unsigned int) * ndarray->shape->len;
+    ndarray->datatype = datatype;
+    ndarray->item_size = get_item_size(ndarray->datatype);
+    ndarray->size = ndarray->item_size * ndarray->shape->len;
     ndarray->data = malloc(ndarray->size);
     if(data == NULL) {
         memset(ndarray->data, 0, ndarray->size);
@@ -19,7 +34,7 @@ NdArray* NdArray_new(void *data, NdShape *ndshape) {
 }
 
 NdArray* NdArray_copy(NdArray *src) {
-    NdArray *dest = NdArray_new(NULL, src->shape);
+    NdArray *dest = NdArray_new(NULL, src->shape, src->datatype);
     dest->size = src->size;
     memcpy(dest->data, src->data, src->size);
     return dest;
@@ -31,34 +46,47 @@ void NdArray_free(NdArray **dptr_ndarray) {
     *dptr_ndarray= NULL;
 }
 
-NdArray* NdArray_empty() {
-    NdShape *ndshape = NdShape_empty(1);
-    NdArray *ndarray = (NdArray*)malloc(sizeof(NdArray));
-    return ndarray;
-}
-
-NdArray* NdArray_zeros(unsigned int len) {
+NdArray* NdArray_zeros(unsigned int len, DataType datatype) {
     NdArray *ndarray = (NdArray*)malloc(sizeof(NdArray));
     ndarray->shape = NdShape_new(1, len);
-    ndarray->size = sizeof(unsigned int) * ndarray->shape->len;
+    ndarray->datatype = datatype;
+    ndarray->item_size = get_item_size(ndarray->datatype);
+    ndarray->size = ndarray->item_size * ndarray->shape->len;
     ndarray->data = malloc(ndarray->size);
-
     memset(ndarray->data, 0, ndarray->size);
     return ndarray;
 }
 
-NdArray* NdArray_ones(unsigned int len) {
-    NdArray *ndarray = NdArray_zeros(len);
+NdArray* NdArray_ones(unsigned int len, DataType datatype) {
+    NdArray *ndarray = NdArray_zeros(len, datatype);
     for(int i = 0; i < len; i++) {
-        *((int*)ndarray->data + i) = 1;
+        switch(datatype) {
+        case DT_INT:
+            *((int*)ndarray->data + i) = 1;
+            break;
+        case DT_DOUBLE:
+            *((double*)ndarray->data + i) = 1.0;
+            break;
+        default:
+            abort();
+        }
     }
     return ndarray;
 }
 
-NdArray* NdArray_arange(unsigned int start, unsigned int end) {
-    NdArray *ndarray = NdArray_zeros(end - start);
+NdArray* NdArray_arange(unsigned int start, unsigned int end, DataType datatype) {
+    NdArray *ndarray = NdArray_zeros(end - start, datatype);
     for(int i = 0; i < end - start; i++) {
-        *((int*)ndarray->data + i) = start + i;
+        switch(datatype) {
+        case DT_INT:
+            *((int*)ndarray->data + i) = start + i;
+            break;
+        case DT_DOUBLE:
+            *((double*)ndarray->data + i) = (double)(start + i);
+            break;
+        default:
+            abort();
+        }
     }
     return ndarray;
 }
@@ -67,7 +95,7 @@ int NdArray_reshape(NdArray *ndarray, NdShape *ndshape) {
     return NdShape_reshape(ndarray->shape, ndshape);
 }
 
-int NdArray_getAt(NdArray *ndarray, unsigned int *position) {
+void* NdArray_getAt(NdArray *ndarray, unsigned int *position) {
     unsigned int offset = 0;
     unsigned int len = ndarray->shape->len;
 
@@ -75,25 +103,43 @@ int NdArray_getAt(NdArray *ndarray, unsigned int *position) {
         len /= ndarray->shape->arr[i];
         offset += position[i] * len;
     }
-
-    return *((int*)ndarray->data + offset);
+    offset *= ndarray->item_size;
+    return ndarray->data + offset;
 }
 
 void NdArray_setAt(NdArray *ndarray, unsigned int *position, void* data) {
-    unsigned int offset = 0;
-    unsigned int len = ndarray->shape->len;
+    void *target_address = NdArray_getAt(ndarray, position);
 
-    for(int i = 0; i < ndarray->shape->dim; i++) {
-        len /= ndarray->shape->arr[i];
-        offset += position[i] * len;
+    switch(ndarray->datatype) {
+    case DT_INT:
+        *((int*)target_address) = *(int*)data;
+        break;
+    case DT_DOUBLE:
+        *((double*)target_address) = *(double*)data;
+        break;
+    default:
+        fprintf(stderr, "invalid datatype");
+        abort();
     }
+}
 
-    *((int*)ndarray->data + offset) = *(int*)data;
+void print_element(NdArray *ndarray, unsigned int *position) {
+    void* ptr_element = NdArray_getAt(ndarray, position);
+    switch(ndarray->datatype) {
+    case DT_INT:
+        printf("%d ", *(int*)ptr_element);
+        break;
+    case DT_DOUBLE:
+        printf("%f ", *(double*)ptr_element);
+        break;
+    default:
+        break;
+    }
 }
 
 void printArray(NdArray *ndarray, unsigned int *position, int dim) {
     if(dim == ndarray->shape->dim) {
-        printf("%d ", NdArray_getAt(ndarray, position));
+        print_element(ndarray, position);
         return;
     }
 
@@ -122,7 +168,20 @@ int NdArray_add(NdArray *dest, NdArray *src) {
     }
 
     for(int i = 0; i < dest->shape->len; i++) {
-        *((int*)dest->data + i) += *((int*)src->data + i);
+        void *ptr_data_dest = dest->data; 
+        void *ptr_data_src = src->data;
+        switch(dest->datatype) {
+        case DT_INT:
+            *((int*)ptr_data_dest) += *((int*)ptr_data_src);
+            break;
+        case DT_DOUBLE:
+            *((double*)ptr_data_dest) += *((double*)ptr_data_src);
+            break;
+        default:
+            abort();
+        }
+        ptr_data_dest += dest->item_size;
+        ptr_data_src += src->item_size;
     }
 
     return 1;
@@ -134,7 +193,20 @@ int NdArray_sub(NdArray *dest, NdArray *src) {
     }
 
     for(int i = 0; i < dest->shape->len; i++) {
-        *((int*)dest->data + i) -= *((int*)src->data + i);
+        void *ptr_data_dest = dest->data; 
+        void *ptr_data_src = src->data;
+        switch(dest->datatype) {
+        case DT_INT:
+            *((int*)ptr_data_dest) -= *((int*)ptr_data_src);
+            break;
+        case DT_DOUBLE:
+            *((double*)ptr_data_dest) -= *((double*)ptr_data_src);
+            break;
+        default:
+            abort();
+        }
+        ptr_data_dest += dest->item_size;
+        ptr_data_src += src->item_size;
     }
 
     return 1;
@@ -146,7 +218,20 @@ int NdArray_mul(NdArray *dest, NdArray *src) {
     }
 
     for(int i = 0; i < dest->shape->len; i++) {
-        *((int*)dest->data + i) *= *((int*)src->data + i);
+        void *ptr_data_dest = dest->data; 
+        void *ptr_data_src = src->data;
+        switch(dest->datatype) {
+        case DT_INT:
+            *((int*)ptr_data_dest) *= *((int*)ptr_data_src);
+            break;
+        case DT_DOUBLE:
+            *((double*)ptr_data_dest) *= *((double*)ptr_data_src);
+            break;
+        default:
+            abort();
+        }
+        ptr_data_dest += dest->item_size;
+        ptr_data_src += src->item_size;
     }
 
     return 1;
@@ -158,7 +243,20 @@ int NdArray_div(NdArray *dest, NdArray *src) {
     }
 
     for(int i = 0; i < dest->shape->len; i++) {
-        *((int*)dest->data + i) /= *((int*)src->data + i);
+        void *ptr_data_dest = dest->data; 
+        void *ptr_data_src = src->data;
+        switch(dest->datatype) {
+        case DT_INT:
+            *((int*)ptr_data_dest) /= *((int*)ptr_data_src);
+            break;
+        case DT_DOUBLE:
+            *((double*)ptr_data_dest) /= *((double*)ptr_data_src);
+            break;
+        default:
+            abort();
+        }
+        ptr_data_dest += dest->item_size;
+        ptr_data_src += src->item_size;
     }
 
     return 1;
@@ -170,7 +268,18 @@ int NdArray_mod(NdArray *dest, NdArray *src) {
     }
 
     for(int i = 0; i < dest->shape->len; i++) {
-        *((int*)dest->data + i) %= *((int*)src->data + i);
+        void *ptr_data_dest = dest->data; 
+        void *ptr_data_src = src->data;
+        switch(dest->datatype) {
+        case DT_INT:
+            *((int*)ptr_data_dest) %= *((int*)ptr_data_src);
+            break;
+        case DT_DOUBLE:
+        default:
+            abort();
+        }
+        ptr_data_dest += dest->item_size;
+        ptr_data_src += src->item_size;
     }
 
     return 1;
@@ -190,17 +299,24 @@ void dot_recursive(NdArray *result, NdArray *a, NdArray *b, unsigned int *positi
         memcpy(position_b, position + (shape_a->dim-1), sizeof(unsigned int) * (shape_b->dim-1));
         position_b[shape_b->dim-1] = position_b[shape_b->dim-2];
 
-        int value_a, value_b;
-        int value_result = 0;
+        void *ptr_value_a;
+        void *ptr_value_b;
+        void *ptr_value_result = NdArray_getAt(result, position);
+        memset(ptr_value_result, 0, result->item_size);
+
         for(int i = 0; i < shape_a->arr[shape_a->dim-1]; i++) {
             position_a[shape_a->dim-1] = i;
             position_b[shape_b->dim-2] = i;
 
-            value_a = NdArray_getAt(a, position_a);
-            value_b = NdArray_getAt(b, position_b);
-            value_result += value_a * value_b;
+            ptr_value_a = NdArray_getAt(a, position_a);
+            ptr_value_b = NdArray_getAt(b, position_b);
+            
+            if(result->datatype == DT_INT) {
+                *(int*)ptr_value_result += (*(int*)ptr_value_a) * (*(int*)ptr_value_b);
+            } else if(result->datatype == DT_DOUBLE) {
+                *(double*)ptr_value_result += (*(double*)ptr_value_a) * (*(double*)ptr_value_b);
+            }
         }
-        NdArray_setAt(result, position, &value_result);
 
         return;
     }
@@ -211,9 +327,55 @@ void dot_recursive(NdArray *result, NdArray *a, NdArray *b, unsigned int *positi
     }
 }
 
+void matmul_recursive(NdArray *result, NdArray *a, NdArray *b, unsigned int *position, unsigned int dim) {
+    NdShape *shape_result = result->shape;
+
+    if(dim >= shape_result->dim) {
+        NdShape *shape_a = a->shape;
+        NdShape *shape_b = b->shape;
+
+        unsigned int *position_a = (unsigned int*)malloc(sizeof(unsigned int) * shape_a->dim);
+        unsigned int *position_b = (unsigned int*)malloc(sizeof(unsigned int) * shape_b->dim);
+        
+        memcpy(position_a, position, sizeof(unsigned int) * shape_a->dim);
+        memcpy(position_b, position, sizeof(unsigned int) * shape_b->dim);
+
+        void *ptr_value_a;
+        void *ptr_value_b;
+        void *ptr_value_result = NdArray_getAt(result, position);
+        memset(ptr_value_result, 0, result->item_size);
+
+        for(int i = 0; i < shape_a->arr[shape_a->dim-1]; i++) {
+            position_a[shape_a->dim-1] = i;
+            position_b[shape_b->dim-2] = i;
+
+            ptr_value_a = NdArray_getAt(a, position_a);
+            ptr_value_b = NdArray_getAt(b, position_b);
+            
+            if(result->datatype == DT_INT) {
+                *(int*)ptr_value_result += (*(int*)ptr_value_a) * (*(int*)ptr_value_b);
+            } else if(result->datatype == DT_DOUBLE) {
+                *(double*)ptr_value_result += (*(double*)ptr_value_a) * (*(double*)ptr_value_b);
+            }
+        }
+
+        return;
+    }
+
+    for(int i = 0; i < shape_result->arr[dim]; i++) {
+        position[dim] = i;
+        matmul_recursive(result, a, b, position, dim+1);
+    }
+}
+
+
 NdArray* NdArray_dot(NdArray *a, NdArray *b) {
     NdArray *result;
     NdShape *shape_result;
+    DataType datatype_result;
+
+    datatype_result = a->datatype;
+
     NdShape *shape_a = a->shape;
     NdShape *shape_b = b->shape;
 
@@ -234,7 +396,7 @@ NdArray* NdArray_dot(NdArray *a, NdArray *b) {
         shape_result->len *= shape_result->arr[i];
     }
 
-    result = NdArray_new(NULL, shape_result);
+    result = NdArray_new(NULL, shape_result, datatype_result);
 
     unsigned int *position = (unsigned int*)malloc(sizeof(unsigned int) * shape_result->dim);
     memset(position, 0, sizeof(unsigned int) * shape_result->dim);
@@ -244,43 +406,12 @@ NdArray* NdArray_dot(NdArray *a, NdArray *b) {
     return result; 
 }
 
-void matmul_recursive(NdArray *result, NdArray *a, NdArray *b, unsigned int *position, unsigned int dim) {
-    NdShape *shape_result = result->shape;
-
-    if(dim >= shape_result->dim) {
-        NdShape *shape_a = a->shape;
-        NdShape *shape_b = b->shape;
-
-        unsigned int *position_a = (unsigned int*)malloc(sizeof(unsigned int) * shape_a->dim);
-        unsigned int *position_b = (unsigned int*)malloc(sizeof(unsigned int) * shape_b->dim);
-        
-        memcpy(position_a, position, sizeof(unsigned int) * shape_a->dim);
-        memcpy(position_b, position, sizeof(unsigned int) * shape_b->dim);
-
-        int value_a, value_b;
-        int value_result = 0;
-        for(int i = 0; i < shape_a->arr[shape_a->dim-1]; i++) {
-            position_a[dim-1] = i;
-            position_b[dim-2] = i;
-
-            value_a = NdArray_getAt(a, position_a);
-            value_b = NdArray_getAt(b, position_b);
-            value_result += value_a * value_b;
-        }
-        NdArray_setAt(result, position, &value_result);
-
-        return;
-    }
-
-    for(int i = 0; i < shape_result->arr[dim]; i++) {
-        position[dim] = i;
-        matmul_recursive(result, a, b, position, dim+1);
-    }
-}
-
 NdArray* NdArray_matmul(NdArray *a, NdArray *b) {
     NdArray *result;
     NdShape *shape_result;
+    DataType datatype_result;
+
+    datatype_result = a->datatype;
     NdShape *shape_a = a->shape;
     NdShape *shape_b = b->shape;
 
@@ -300,7 +431,7 @@ NdArray* NdArray_matmul(NdArray *a, NdArray *b) {
 
     shape_result = NdShape_copy(shape_a);
     shape_result->arr[shape_result->dim-1] = shape_b->arr[shape_b->dim-1];
-    result = NdArray_new(NULL, shape_result);
+    result = NdArray_new(NULL, shape_result, datatype_result);
 
     unsigned int *position = (unsigned int*)malloc(sizeof(unsigned int) * shape_result->dim);
     memset(position, 0, shape_result->dim);
@@ -310,39 +441,87 @@ NdArray* NdArray_matmul(NdArray *a, NdArray *b) {
     return result;
 }
 
-void NdArray_add_scalar(NdArray *ndarray, int value) {
-    int *data = (int*)ndarray->data;
+void NdArray_add_scalar(NdArray *ndarray, double value) {
+    void *ptr_data = ndarray->data;
     for(int i = 0; i < ndarray->shape->len; i++) {
-        data[i] += value;
+        switch(ndarray->datatype) {
+        case DT_INT:
+            *(int*)ptr_data += (int)value;
+            break;
+        case DT_DOUBLE:
+            *(double*)ptr_data += value;
+            break;
+        default:
+            abort();
+        }
+        ptr_data += ndarray->item_size;
     }
 }
 
-void NdArray_sub_scalar(NdArray *ndarray, int value) {
-    int *data = (int*)ndarray->data;
+void NdArray_sub_scalar(NdArray *ndarray, double value) {
+    void *ptr_data = ndarray->data;
     for(int i = 0; i < ndarray->shape->len; i++) {
-        data[i] -= value;
+        switch(ndarray->datatype) {
+        case DT_INT:
+            *(int*)ptr_data -= (int)value;
+            break;
+        case DT_DOUBLE:
+            *(double*)ptr_data -= value;
+            break;
+        default:
+            abort();
+        }
+        ptr_data += ndarray->item_size;
     }
 }
 
-void NdArray_mul_scalar(NdArray *ndarray, int value) {
-    int *data = (int*)ndarray->data;
+void NdArray_mul_scalar(NdArray *ndarray, double value) {
+    void *ptr_data = ndarray->data;
     for(int i = 0; i < ndarray->shape->len; i++) {
-        data[i] *= value;
+        switch(ndarray->datatype) {
+        case DT_INT:
+            *(int*)ptr_data *= (int)value;
+            break;
+        case DT_DOUBLE:
+            *(double*)ptr_data *= value;
+            break;
+        default:
+            abort();
+        }
+        ptr_data += ndarray->item_size;
     }
 }
 
-void NdArray_div_scalar(NdArray *ndarray, int value) {
+void NdArray_div_scalar(NdArray *ndarray, double value) {
     assert(value != 0);
-    int *data = (int*)ndarray->data;
+    void *ptr_data = ndarray->data;
     for(int i = 0; i < ndarray->shape->len; i++) {
-        data[i] /= value;
+        switch(ndarray->datatype) {
+        case DT_INT:
+            *(int*)ptr_data /= (int)value;
+            break;
+        case DT_DOUBLE:
+            *(double*)ptr_data /= value;
+            break;
+        default:
+            abort();
+        }
+        ptr_data += ndarray->item_size;
     }
 }
 
 void NdArray_mod_scalar(NdArray *ndarray, int value) {
     assert(value != 0);
-    int *data = (int*)ndarray->data;
+    void *ptr_data = ndarray->data;
     for(int i = 0; i < ndarray->shape->len; i++) {
-        data[i] %= value;
+        switch(ndarray->datatype) {
+        case DT_INT:
+            *(int*)ptr_data %= (int)value;
+            break;
+        case DT_DOUBLE:
+        default:
+            abort();
+        }
+        ptr_data += ndarray->item_size;
     }
 }

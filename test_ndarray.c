@@ -6,21 +6,21 @@
 
 void test_ndarray_new() {
     NdShape *shape = NdShape_new(2, 2, 2);
-    NdArray *array = NdArray_new(NULL, shape);
+    NdArray *array = NdArray_new(NULL, shape, DT_INT);
     NdArray_printArray(array);
 }
 
 void test_ndarray_new_with_data() {
     unsigned int data[2][2] = { {1, 2}, {3, 4} };
     NdShape *shape = NdShape_new(2, 2, 2);
-    NdArray *array = NdArray_new(data, shape);
+    NdArray *array = NdArray_new(data, shape, DT_INT);
     NdArray_printArray(array);
 }
 
 void test_ndarray_copy() {
     unsigned int data[2][2] = { {1, 2}, {3, 4} };
     NdShape *shape = NdShape_new(2, 2, 2);
-    NdArray *array = NdArray_new(data, shape);
+    NdArray *array = NdArray_new(data, shape, DT_INT);
     NdArray *copied = NdArray_copy(array);
     printf("array : ");
     NdArray_printArray(array);
@@ -29,9 +29,9 @@ void test_ndarray_copy() {
 }
 
 void test_ndarray_aranges() {
-    NdArray *array_zeros = NdArray_zeros(21);
-    NdArray *array_ones = NdArray_ones(30);
-    NdArray *array_arange = NdArray_arange(5, 50);
+    NdArray *array_zeros = NdArray_zeros(21, DT_INT);
+    NdArray *array_ones = NdArray_ones(30, DT_INT);
+    NdArray *array_arange = NdArray_arange(5, 50, DT_INT);
 
     printf("zeors  : ");
     NdArray_printArray(array_zeros);
@@ -68,9 +68,9 @@ void test_ndarray_reshape() {
     NdShape *shape5 = NdShape_new(3, 4, 6, 5);
     NdShape *shape6 = NdShape_new(5, 2, 2, 2, 3, 5);
 
-    NdArray *array0 = NdArray_new(data0, shape0);
-    NdArray *array1 = NdArray_new(data1, shape1);
-    NdArray *array2 = NdArray_arange(1, 121);
+    NdArray *array0 = NdArray_new(data0, shape0, DT_INT);
+    NdArray *array1 = NdArray_new(data1, shape1, DT_INT);
+    NdArray *array2 = NdArray_arange(1, 121, DT_INT);
 
     printf("before reshaping array0 : ");
     NdArray_printShape(array0);
@@ -109,12 +109,12 @@ void test_ndarray_reshape() {
 
 void test_ndarray_get_set() {
     NdShape *shape = NdShape_new(6, 3, 3, 3, 3, 3, 3);
-    NdArray *array = NdArray_arange(0, 729);
+    NdArray *array = NdArray_arange(0, 729, DT_INT);
     NdArray_reshape(array, shape);
 
     unsigned int position[6] = {1, 1, 1, 1, 1, 0};
-    int value = NdArray_getAt(array, position);
-    printf("%d\n", value);
+    int* ptr_value = (int*)NdArray_getAt(array, position);
+    printf("%d\n", *ptr_value);
 
     int new_value = -1;
     NdArray_setAt(array, position, &new_value);
@@ -123,7 +123,7 @@ void test_ndarray_get_set() {
 
 void test_ndarray_matmul() {
     NdShape *shape = NdShape_new(2, 2, 2);
-    NdArray *array = NdArray_arange(1,5);
+    NdArray *array = NdArray_arange(1, 5, DT_INT);
     NdArray_reshape(array, shape);
 
     NdArray *result = NdArray_matmul(array, array);
@@ -133,8 +133,8 @@ void test_ndarray_matmul() {
     NdShape *shape0 = NdShape_new(5, 2, 3, 4, 5, 6);
     NdShape *shape1 = NdShape_new(5, 2, 3, 4, 6, 7);
 
-    NdArray *array0 = NdArray_arange(1, 721);
-    NdArray *array1 = NdArray_arange(1, 1009);
+    NdArray *array0 = NdArray_arange(1, 721, DT_INT);
+    NdArray *array1 = NdArray_arange(1, 1009, DT_INT);
 
     NdArray_reshape(array0, shape0);
     NdArray_reshape(array1, shape1);
@@ -146,7 +146,7 @@ void test_ndarray_matmul() {
 
 void test_ndarray_dot() {
     NdShape *shape = NdShape_new(2, 2, 2);
-    NdArray *array = NdArray_arange(1,5);
+    NdArray *array = NdArray_arange(1, 5, DT_INT);
     NdArray_reshape(array, shape);
 
     NdArray *result = NdArray_dot(array, array);
@@ -156,13 +156,67 @@ void test_ndarray_dot() {
     NdShape *shape0 = NdShape_new(4, 3, 3, 3, 6);
     NdShape *shape1 = NdShape_new(4, 4, 4, 6, 4);
 
-    NdArray *array0 = NdArray_arange(1, 163);
-    NdArray *array1 = NdArray_arange(1, 385);
+    NdArray *array0 = NdArray_arange(1, 163, DT_INT);
+    NdArray *array1 = NdArray_arange(1, 385, DT_INT);
 
     NdArray_reshape(array0, shape0);
     NdArray_reshape(array1, shape1);
     
     result = NdArray_dot(array0, array1);
+    NdArray_printArray(result);
+    NdArray_printShape(result);
+}
+
+void test_ndarray_matmul_float() {
+    double data0[2][2] = { {1.0, 1.1}, {2.0, 2.1} };
+    double data1[2][4] = { {1.0, 1.1, 1.2, 1.3}, {2.0, 2.1, 2.2, 2.3} };
+    
+    NdShape *shape0 = NdShape_new(2, 2, 2);
+    NdShape *shape1 = NdShape_new(2, 2, 4);
+
+    NdArray *array0 = NdArray_new(data0, shape0, DT_DOUBLE);
+    NdArray *array1 = NdArray_new(data1, shape1, DT_DOUBLE);
+
+    NdArray *result = NdArray_dot(array0, array1);
+    NdArray_printArray(result);
+
+    NdShape *shape2 = NdShape_new(5, 2, 3, 4, 5, 6);
+    NdShape *shape3 = NdShape_new(5, 2, 3, 4, 6, 7);
+
+    NdArray *array2 = NdArray_arange(1, 721, DT_DOUBLE);
+    NdArray *array3 = NdArray_arange(1, 1009, DT_DOUBLE);
+
+    NdArray_reshape(array2, shape2);
+    NdArray_reshape(array3, shape3);
+    
+    result = NdArray_matmul(array2, array3);
+    NdArray_printArray(result);
+    NdArray_printShape(result);
+}
+
+void test_ndarray_dot_float() {
+    double data0[2][2] = { {1.0, 1.1}, {2.0, 2.1} };
+    double data1[2][4] = { {1.0, 1.1, 1.2, 1.3}, {2.0, 2.1, 2.2, 2.3} };
+    
+    NdShape *shape0 = NdShape_new(2, 2, 2);
+    NdShape *shape1 = NdShape_new(2, 2, 4);
+
+    NdArray *array0 = NdArray_new(data0, shape0, DT_DOUBLE);
+    NdArray *array1 = NdArray_new(data1, shape1, DT_DOUBLE);
+
+    NdArray *result = NdArray_dot(array0, array1);
+    NdArray_printArray(result);
+
+    NdShape *shape2 = NdShape_new(4, 3, 3, 3, 6);
+    NdShape *shape3 = NdShape_new(4, 4, 4, 6, 4);
+
+    NdArray *array2 = NdArray_arange(1, 163, DT_DOUBLE);
+    NdArray *array3 = NdArray_arange(1, 385, DT_DOUBLE);
+
+    NdArray_reshape(array2, shape2);
+    NdArray_reshape(array3, shape3);
+        
+    result = NdArray_dot(array2, array3);
     NdArray_printArray(result);
     NdArray_printShape(result);
 }
@@ -176,5 +230,7 @@ int main() {
     test("test_ndarray_get_set", test_ndarray_get_set);
     test("test_ndarray_matmul", test_ndarray_matmul);
     test("test_ndarray_dot", test_ndarray_dot);
+    test("test_ndarray_matul_float", test_ndarray_matmul_float);
+    test("test_ndarray_dot_float", test_ndarray_dot_float);
     return 0;
 }
