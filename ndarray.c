@@ -379,10 +379,6 @@ NdArray* NdArray_dot(NdArray *a, NdArray *b) {
     NdShape *shape_a = a->shape;
     NdShape *shape_b = b->shape;
 
-    if(shape_a->dim != shape_b->dim) {
-        return NULL;
-    }
-
     if(shape_a->arr[shape_a->dim-1] != shape_b->arr[shape_b->dim-2]) {
         return NULL;
     }
