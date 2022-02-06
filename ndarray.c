@@ -337,8 +337,11 @@ void matmul_recursive(NdArray *result, NdArray *a, NdArray *b, unsigned int *pos
         unsigned int *position_a = (unsigned int*)malloc(sizeof(unsigned int) * shape_a->dim);
         unsigned int *position_b = (unsigned int*)malloc(sizeof(unsigned int) * shape_b->dim);
         
-        memcpy(position_a, position, sizeof(unsigned int) * shape_a->dim);
-        memcpy(position_b, position, sizeof(unsigned int) * shape_b->dim);
+        int offset_a = (shape_a->dim >= shape_b->dim) ? 0 : shape_b->dim - shape_a->dim;
+        int offset_b = (shape_a->dim >= shape_b->dim) ? shape_a->dim - shape_b->dim : 0;
+        
+        memcpy(position_a, position + offset_a, sizeof(unsigned int) * shape_a->dim);
+        memcpy(position_b, position + offset_b, sizeof(unsigned int) * shape_b->dim);
 
         void *ptr_value_a;
         void *ptr_value_b;
@@ -411,22 +414,25 @@ NdArray* NdArray_matmul(NdArray *a, NdArray *b) {
     NdShape *shape_a = a->shape;
     NdShape *shape_b = b->shape;
 
-    if(shape_a->dim != shape_b->dim) {
-        return NULL;
-    }
-
     if(shape_a->arr[shape_a->dim-1] != shape_b->arr[shape_b->dim-2]) {
+        printf("nope1\n");
         return NULL;
     }
 
-    for(int i = 0; i < shape_a->dim-2; i++) {
-        if(shape_a->arr[i] != shape_b->arr[i]) {
+    int bound = (shape_a->dim >= shape_b->dim) ? shape_b->dim-2 : shape_a->dim-2;
+    for(int i = 0; i < bound; i++) {
+        if(shape_a->arr[shape_a->dim-i-3] != shape_b->arr[shape_b->dim-i-3]) {
             return NULL;
         }
     }
 
-    shape_result = NdShape_copy(shape_a);
-    shape_result->arr[shape_result->dim-1] = shape_b->arr[shape_b->dim-1];
+    if(shape_a->dim >= shape_b->dim) {
+        shape_result = NdShape_copy(shape_a);
+        shape_result->arr[shape_result->dim-1] = shape_b->arr[shape_b->dim-1];
+    } else {
+        shape_result = NdShape_copy(shape_b);
+        shape_result->arr[shape_result->dim-2] = shape_a->arr[shape_a->dim-2];
+    }
     result = NdArray_new(NULL, shape_result, datatype_result);
 
     unsigned int *position = (unsigned int*)malloc(sizeof(unsigned int) * shape_result->dim);

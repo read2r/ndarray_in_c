@@ -122,26 +122,74 @@ void test_ndarray_get_set() {
 }
 
 void test_ndarray_matmul() {
-    NdShape *shape = NdShape_new(2, 2, 2);
-    NdArray *array = NdArray_arange(1, 5, DT_INT);
+    NdShape *shape, *shape0, *shape1, *shape_result;
+    NdArray *array, *array0, *array1, *array_result;
+
+    // simple matmul test.
+    shape = NdShape_new(2, 2, 2);
+    array = NdArray_arange(1, 5, DT_INT);
     NdArray_reshape(array, shape);
 
-    NdArray *result = NdArray_matmul(array, array);
-    NdArray_printShape(result);
-    NdArray_printArray(result);
+    array_result = NdArray_matmul(array, array);
+    NdArray_printShape(array_result);
+    NdArray_printArray(array_result);
 
-    NdShape *shape0 = NdShape_new(5, 2, 3, 4, 5, 6);
-    NdShape *shape1 = NdShape_new(5, 2, 3, 4, 6, 7);
+    NdArray_free(&array);
+    NdArray_free(&array_result);
 
-    NdArray *array0 = NdArray_arange(1, 721, DT_INT);
-    NdArray *array1 = NdArray_arange(1, 1009, DT_INT);
+    // two arrays matmul test, taht have same N dimensions.
+    shape0 = NdShape_new(5, 2, 3, 4, 5, 6);
+    shape1 = NdShape_new(5, 2, 3, 4, 6, 7);
+
+    array0 = NdArray_arange(1, 721, DT_INT);
+    array1 = NdArray_arange(1, 1009, DT_INT);
 
     NdArray_reshape(array0, shape0);
     NdArray_reshape(array1, shape1);
     
-    result = NdArray_matmul(array0, array1);
-    NdArray_printArray(result);
-    NdArray_printShape(result);
+    array_result = NdArray_matmul(array0, array1);
+    NdArray_printArray(array_result);
+    NdArray_printShape(array_result);
+
+    NdArray_free(&array0);
+    NdArray_free(&array1);
+    NdArray_free(&array_result);
+
+    // two arrays matmul test(1), that have different N dimesions.
+    shape0 = NdShape_new(5, 3, 3, 3, 3, 10);
+    shape1 = NdShape_new(3, 3, 10, 5);
+
+    array0 = NdArray_arange(1, 811, DT_INT);
+    array1 = NdArray_arange(1, 151, DT_INT);
+
+    NdArray_reshape(array0, shape0);
+    NdArray_reshape(array1, shape1);
+    
+    array_result = NdArray_matmul(array0, array1);
+    NdArray_printArray(array_result);
+    NdArray_printShape(array_result);
+
+    NdArray_free(&array0);
+    NdArray_free(&array1);
+    NdArray_free(&array_result);
+
+    // two arrays matmul test(2), that have different N dimesions.
+    shape0 = NdShape_new(3, 3, 3, 10);
+    shape1 = NdShape_new(6, 2, 2, 3, 3, 10, 2);
+
+    array0 = NdArray_arange(1, 91, DT_INT);
+    array1 = NdArray_arange(1, 721, DT_INT);
+
+    NdArray_reshape(array0, shape0);
+    NdArray_reshape(array1, shape1);
+    
+    array_result = NdArray_matmul(array0, array1);
+    NdArray_printArray(array_result);
+    NdArray_printShape(array_result);
+
+    NdArray_free(&array0);
+    NdArray_free(&array1);
+    NdArray_free(&array_result);
 }
 
 void test_ndarray_dot() {
@@ -290,7 +338,7 @@ int main() {
     test("test_ndarray_get_set", test_ndarray_get_set);
     test("test_ndarray_matmul", test_ndarray_matmul);
     test("test_ndarray_dot", test_ndarray_dot);
-    //test("test_ndarray_matul_float", test_ndarray_matmul_float);
+    test("test_ndarray_matul_float", test_ndarray_matmul_float);
     test("test_ndarray_dot_float", test_ndarray_dot_float);
     return 0;
 }
