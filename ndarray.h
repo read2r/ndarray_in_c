@@ -18,6 +18,8 @@ typedef struct tagNdArray {
     void *data;
 } NdArray;
 
+typedef void*(*broadcast_func)(void*);
+
 // create, deep copy and delete ndarray
 NdArray* NdArray_new(void *data, NdShape *ndshape, DataType datatype);
 NdArray* NdArray_copy(NdArray *src);
@@ -56,5 +58,7 @@ void NdArray_sub_scalar(NdArray *ndarray, double value);
 void NdArray_mul_scalar(NdArray *ndarray, double value);
 void NdArray_div_scalar(NdArray *ndarray, double value);
 //void NdArray_mod_scalar(NdArray *ndarray, int value);
+
+void NdArray_broadcast(NdArray *ndarray, broadcast_func bfunc);
 
 #endif

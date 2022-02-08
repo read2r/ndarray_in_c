@@ -167,9 +167,9 @@ int NdArray_add(NdArray *dest, NdArray *src) {
         return 0;
     }
 
+    void *ptr_data_dest = dest->data; 
+    void *ptr_data_src = src->data;
     for(int i = 0; i < dest->shape->len; i++) {
-        void *ptr_data_dest = dest->data; 
-        void *ptr_data_src = src->data;
         switch(dest->datatype) {
         case DT_INT:
             *((int*)ptr_data_dest) += *((int*)ptr_data_src);
@@ -192,9 +192,9 @@ int NdArray_sub(NdArray *dest, NdArray *src) {
         return 0;
     }
 
+    void *ptr_data_dest = dest->data; 
+    void *ptr_data_src = src->data;
     for(int i = 0; i < dest->shape->len; i++) {
-        void *ptr_data_dest = dest->data; 
-        void *ptr_data_src = src->data;
         switch(dest->datatype) {
         case DT_INT:
             *((int*)ptr_data_dest) -= *((int*)ptr_data_src);
@@ -217,9 +217,9 @@ int NdArray_mul(NdArray *dest, NdArray *src) {
         return 0;
     }
 
+    void *ptr_data_dest = dest->data; 
+    void *ptr_data_src = src->data;
     for(int i = 0; i < dest->shape->len; i++) {
-        void *ptr_data_dest = dest->data; 
-        void *ptr_data_src = src->data;
         switch(dest->datatype) {
         case DT_INT:
             *((int*)ptr_data_dest) *= *((int*)ptr_data_src);
@@ -242,9 +242,9 @@ int NdArray_div(NdArray *dest, NdArray *src) {
         return 0;
     }
 
+    void *ptr_data_dest = dest->data; 
+    void *ptr_data_src = src->data;
     for(int i = 0; i < dest->shape->len; i++) {
-        void *ptr_data_dest = dest->data; 
-        void *ptr_data_src = src->data;
         switch(dest->datatype) {
         case DT_INT:
             *((int*)ptr_data_dest) /= *((int*)ptr_data_src);
@@ -267,9 +267,9 @@ int NdArray_mod(NdArray *dest, NdArray *src) {
         return 0;
     }
 
+    void *ptr_data_dest = dest->data; 
+    void *ptr_data_src = src->data;
     for(int i = 0; i < dest->shape->len; i++) {
-        void *ptr_data_dest = dest->data; 
-        void *ptr_data_src = src->data;
         switch(dest->datatype) {
         case DT_INT:
             *((int*)ptr_data_dest) %= *((int*)ptr_data_src);
@@ -521,6 +521,25 @@ void NdArray_mod_scalar(NdArray *ndarray, int value) {
             *(int*)ptr_data %= (int)value;
             break;
         case DT_DOUBLE:
+        default:
+            abort();
+        }
+        ptr_data += ndarray->item_size;
+    }
+}
+
+void NdArray_broadcast(NdArray *ndarray, broadcast_func bfunc) {
+    void *ptr_data = ndarray->data;
+    void *result;
+    for(int i = 0; i < ndarray->shape->len; i++) {
+        result = bfunc(ptr_data);
+        switch(ndarray->datatype) {
+        case DT_INT:
+            *(int*)ptr_data = *(int*)result;
+            break;
+        case DT_DOUBLE:
+            *(double*)ptr_data = *(double*)result;
+            break;
         default:
             abort();
         }

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "tester.h"
 #include "ndarray.h"
 #include "ndshape.h"
@@ -329,6 +330,43 @@ void test_ndarray_dot_float() {
     NdArray_printShape(array_result);
 }
 
+void* sigmoid(void *ptr_x) {
+    double x = *(double*)ptr_x;
+    *(double*)ptr_x = 1 + 1 / exp(-x);
+    return ptr_x;
+}
+
+void test_ndarray_operations() {
+    NdArray *array = NdArray_arange(1, 10, DT_DOUBLE);
+    double a = 0.1;
+
+    NdArray_add_scalar(array, a);
+    NdArray_printArray(array);
+    NdArray_sub_scalar(array, a);
+    NdArray_printArray(array);
+    NdArray_mul_scalar(array, a);
+    NdArray_printArray(array);
+    NdArray_div_scalar(array, a);
+    NdArray_printArray(array);
+    printf("\n");
+
+    NdArray *array0 = NdArray_copy(array);
+    NdArray *array1 = NdArray_copy(array);
+
+    NdArray_add(array0, array1);
+    NdArray_printArray(array0);
+    NdArray_sub(array0, array1);
+    NdArray_printArray(array0);
+    NdArray_mul(array0, array1);
+    NdArray_printArray(array0);
+    NdArray_div(array0, array1);
+    NdArray_printArray(array0);
+    printf("\n");
+
+    NdArray_broadcast(array, sigmoid);
+    NdArray_printArray(array);
+}
+
 int main() {
     test("test_ndarray_new", test_ndarray_new);
     test("test_ndarray_new_with_data", test_ndarray_new_with_data);
@@ -340,5 +378,6 @@ int main() {
     test("test_ndarray_dot", test_ndarray_dot);
     test("test_ndarray_matul_float", test_ndarray_matmul_float);
     test("test_ndarray_dot_float", test_ndarray_dot_float);
+    test("test_ndarray_operations", test_ndarray_operations);
     return 0;
 }
