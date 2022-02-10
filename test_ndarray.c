@@ -365,6 +365,40 @@ void test_ndarray_operations() {
 
     NdArray_broadcast(array, sigmoid);
     NdArray_printArray(array);
+
+    NdShape *shape2 = NdShape_new(4, 3, 4, 5, 6);
+    NdShape *shape3 = NdShape_new(2, 5, 6);
+
+    NdArray *array2 = NdArray_ones(3 * 4 * 5 * 6, DT_DOUBLE);
+    NdArray *array3 = NdArray_arange(1, 5 * 6 + 1, DT_DOUBLE);
+
+    NdArray_reshape(array2, shape2);
+    NdArray_reshape(array3, shape3);
+
+    NdArray_mul_scalar(array3, 2);
+
+    NdArray_printArray(array1);
+    NdArray_printArray(array2);
+
+    NdArray_add(array2, array3); 
+    printf("add : ");
+    NdArray_printArray(array2);
+    printf("\n");
+
+    NdArray_sub(array2, array3); 
+    printf("sub : ");
+    NdArray_printArray(array2);
+    printf("\n");
+
+    NdArray_mul(array2, array3); 
+    printf("mul : ");
+    NdArray_printArray(array2);
+    printf("\n");
+
+    NdArray_div(array2, array3); 
+    printf("div : ");
+    NdArray_printArray(array2);
+    printf("\n");
 }
 
 int main() {

@@ -162,101 +162,139 @@ void NdArray_printShape(NdArray *ndarray) {
     return NdShape_print(ndarray->shape);
 }
 
-int NdArray_add(NdArray *dest, NdArray *src) {
-    if(!NdShape_compare(dest->shape, src->shape)) {
+int NdArray_is_arithmetically_vaild(NdArray *a, NdArray *b){
+    if(a->datatype != b->datatype) {
         return 0;
     }
 
-    void *ptr_data_dest = dest->data; 
-    void *ptr_data_src = src->data;
-    for(int i = 0; i < dest->shape->len; i++) {
-        switch(dest->datatype) {
-        case DT_INT:
-            *((int*)ptr_data_dest) += *((int*)ptr_data_src);
-            break;
-        case DT_DOUBLE:
-            *((double*)ptr_data_dest) += *((double*)ptr_data_src);
-            break;
-        default:
-            abort();
+    if(a->shape->dim < b->shape->dim) {
+        return 0;
+    }
+
+    for(int i = 0; i < b->shape->dim; i++) {
+        if(a->shape->arr[a->shape->dim-i-1] != b->shape->arr[b->shape->dim-i-1]) {
+            return 0;
         }
-        ptr_data_dest += dest->item_size;
-        ptr_data_src += src->item_size;
+    }
+
+    return 1;
+}
+
+int NdArray_add(NdArray *dest, NdArray *src) {
+    void *cur_dest;
+    void *cur_src;
+
+    if(!NdArray_is_arithmetically_vaild(dest, src)) {
+        return 0;
+    }
+
+    cur_dest = dest->data;
+    for(int i = 0; i < dest->shape->len / src->shape->len; i++) {
+        cur_src = src->data;
+        for(int j = 0; j < src->shape->len; j++) {
+            switch(dest->datatype) {
+            case DT_INT:
+                *((int*)cur_dest) += *((int*)cur_src);
+                break;
+            case DT_DOUBLE:
+                *((double*)cur_dest) += *((double*)cur_src);
+                break;
+            default:
+                abort();
+            }
+            cur_dest += dest->item_size;
+            cur_src += src->item_size;
+        }
     }
 
     return 1;
 }
 
 int NdArray_sub(NdArray *dest, NdArray *src) {
-    if(!NdShape_compare(dest->shape, src->shape)) {
+    void *cur_dest;
+    void *cur_src;
+
+    if(!NdArray_is_arithmetically_vaild(dest, src)) {
         return 0;
     }
 
-    void *ptr_data_dest = dest->data; 
-    void *ptr_data_src = src->data;
-    for(int i = 0; i < dest->shape->len; i++) {
-        switch(dest->datatype) {
-        case DT_INT:
-            *((int*)ptr_data_dest) -= *((int*)ptr_data_src);
-            break;
-        case DT_DOUBLE:
-            *((double*)ptr_data_dest) -= *((double*)ptr_data_src);
-            break;
-        default:
-            abort();
+    cur_dest = dest->data;
+    for(int i = 0; i < dest->shape->len / src->shape->len; i++) {
+        cur_src = src->data;
+        for(int j = 0; j < src->shape->len; j++) {
+            switch(dest->datatype) {
+            case DT_INT:
+                *((int*)cur_dest) -= *((int*)cur_src);
+                break;
+            case DT_DOUBLE:
+                *((double*)cur_dest) -= *((double*)cur_src);
+                break;
+            default:
+                abort();
+            }
+            cur_dest += dest->item_size;
+            cur_src += src->item_size;
         }
-        ptr_data_dest += dest->item_size;
-        ptr_data_src += src->item_size;
     }
 
     return 1;
 }
 
 int NdArray_mul(NdArray *dest, NdArray *src) {
-    if(!NdShape_compare(dest->shape, src->shape)) {
+    void *cur_dest;
+    void *cur_src;
+
+    if(!NdArray_is_arithmetically_vaild(dest, src)) {
         return 0;
     }
 
-    void *ptr_data_dest = dest->data; 
-    void *ptr_data_src = src->data;
-    for(int i = 0; i < dest->shape->len; i++) {
-        switch(dest->datatype) {
-        case DT_INT:
-            *((int*)ptr_data_dest) *= *((int*)ptr_data_src);
-            break;
-        case DT_DOUBLE:
-            *((double*)ptr_data_dest) *= *((double*)ptr_data_src);
-            break;
-        default:
-            abort();
+    cur_dest = dest->data;
+    for(int i = 0; i < dest->shape->len / src->shape->len; i++) {
+        cur_src = src->data;
+        for(int j = 0; j < src->shape->len; j++) {
+            switch(dest->datatype) {
+            case DT_INT:
+                *((int*)cur_dest) *= *((int*)cur_src);
+                break;
+            case DT_DOUBLE:
+                *((double*)cur_dest) *= *((double*)cur_src);
+                break;
+            default:
+                abort();
+            }
+            cur_dest += dest->item_size;
+            cur_src += src->item_size;
         }
-        ptr_data_dest += dest->item_size;
-        ptr_data_src += src->item_size;
     }
 
     return 1;
 }
 
 int NdArray_div(NdArray *dest, NdArray *src) {
-    if(!NdShape_compare(dest->shape, src->shape)) {
+    void *cur_dest;
+    void *cur_src;
+
+    if(!NdArray_is_arithmetically_vaild(dest, src)) {
         return 0;
     }
 
-    void *ptr_data_dest = dest->data; 
-    void *ptr_data_src = src->data;
-    for(int i = 0; i < dest->shape->len; i++) {
-        switch(dest->datatype) {
-        case DT_INT:
-            *((int*)ptr_data_dest) /= *((int*)ptr_data_src);
-            break;
-        case DT_DOUBLE:
-            *((double*)ptr_data_dest) /= *((double*)ptr_data_src);
-            break;
-        default:
-            abort();
+    cur_dest = dest->data;
+    for(int i = 0; i < dest->shape->len / src->shape->len; i++) {
+        cur_src = src->data;
+        for(int j = 0; j < src->shape->len; j++) {
+            switch(dest->datatype) {
+            case DT_INT:
+                *((int*)cur_dest) /= *((int*)cur_src);
+                break;
+            case DT_DOUBLE:
+                *((double*)cur_dest) /= *((double*)cur_src);
+                break;
+            default:
+                abort();
+            }
+            cur_dest += dest->item_size;
+            cur_src += src->item_size;
         }
-        ptr_data_dest += dest->item_size;
-        ptr_data_src += src->item_size;
     }
 
     return 1;
@@ -530,15 +568,11 @@ void NdArray_mod_scalar(NdArray *ndarray, int value) {
 
 void NdArray_broadcast(NdArray *ndarray, broadcast_func bfunc) {
     void *ptr_data = ndarray->data;
-    void *result;
     for(int i = 0; i < ndarray->shape->len; i++) {
-        result = bfunc(ptr_data);
         switch(ndarray->datatype) {
         case DT_INT:
-            *(int*)ptr_data = *(int*)result;
-            break;
         case DT_DOUBLE:
-            *(double*)ptr_data = *(double*)result;
+            bfunc(ptr_data);
             break;
         default:
             abort();
