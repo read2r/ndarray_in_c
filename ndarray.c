@@ -42,6 +42,13 @@ NdArray* NdArray_copy(NdArray *src) {
 
 void NdArray_free(NdArray **dptr_ndarray) {
     NdShape_free(&((*dptr_ndarray)->shape));
+    free((*dptr_ndarray)->data);
+    free(*dptr_ndarray);
+    *dptr_ndarray= NULL;
+}
+
+void NdArray_sub_free(NdArray **dptr_ndarray) {
+    NdShape_free(&((*dptr_ndarray)->shape));
     free(*dptr_ndarray);
     *dptr_ndarray= NULL;
 }
@@ -95,15 +102,19 @@ int NdArray_reshape(NdArray *ndarray, NdShape *ndshape) {
     return NdShape_reshape(ndarray->shape, ndshape);
 }
 
-void* NdArray_getAt(NdArray *ndarray, unsigned int *position) {
+unsigned int get_offset(NdArray *ndarray, unsigned int *position, int pdim) {
     unsigned int offset = 0;
     unsigned int len = ndarray->shape->len;
-
-    for(int i = 0; i < ndarray->shape->dim; i++) {
+    for(int i = 0; i < pdim; i++) {
         len /= ndarray->shape->arr[i];
         offset += position[i] * len;
     }
     offset *= ndarray->item_size;
+    return offset;
+}
+
+void* NdArray_getAt(NdArray *ndarray, unsigned int *position) {
+    unsigned int offset = get_offset(ndarray, position, ndarray->shape->dim);
     return ndarray->data + offset;
 }
 
@@ -121,6 +132,18 @@ void NdArray_setAt(NdArray *ndarray, unsigned int *position, void* data) {
         fprintf(stderr, "invalid datatype");
         abort();
     }
+}
+
+NdArray* NdArray_subarray(NdArray *ndarray, unsigned int *position, int pdim) {
+    unsigned int offset = get_offset(ndarray, position, pdim);
+    unsigned int subarray_dim = ndarray->shape->dim - pdim;
+    NdShape *subshape = NdShape_empty(subarray_dim);
+    for(int i = 0; i < subarray_dim; i++) {
+        subshape->arr[i] = ndarray->shape->arr[pdim + i];
+        subshape->len *= subshape->arr[i];
+    }
+    NdArray *subarray = NdArray_new(ndarray->data + offset, subshape, ndarray->datatype);
+    return subarray;
 }
 
 void print_element(NdArray *ndarray, unsigned int *position) {

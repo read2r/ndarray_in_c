@@ -24,6 +24,7 @@ typedef void*(*broadcast_func)(void*);
 NdArray* NdArray_new(void *data, NdShape *ndshape, DataType datatype);
 NdArray* NdArray_copy(NdArray *src);
 void NdArray_free(NdArray **dptr_ndarray);
+void NdArray_sub_free(NdArray **dptr_ndarray);
 
 // just array
 NdArray* NdArray_zeros(unsigned int len, DataType datatype);
@@ -33,9 +34,10 @@ NdArray* NdArray_arange(unsigned int start, unsigned int end, DataType datatype)
 // reshape ndarray
 int NdArray_reshape(NdArray *ndarray, NdShape *ndshape);
 
-// get element in ndarray
+// get, set element, ndarray
 void* NdArray_getAt(NdArray *ndarray, unsigned int *position);
 void NdArray_setAt(NdArray *ndarray, unsigned int *position, void* data);
+NdArray* NdArray_subarray(NdArray *ndarray, unsigned int *position, int pdim);
 
 // print
 void NdArray_printArray(NdArray *ndarray);

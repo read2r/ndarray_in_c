@@ -401,6 +401,29 @@ void test_ndarray_operations() {
     printf("\n");
 }
 
+void test_ndarray_subarray() {
+    NdShape *shape = NdShape_new(4, 10, 2, 3, 4);
+    NdArray *array = NdArray_arange(0, 10 * 2 * 3 * 4, DT_INT);
+    NdArray_reshape(array, shape);
+
+    unsigned int indices[3] = { 0, 3, 9 };
+    for(int i = 0; i < 3; i++) {
+        NdArray *subarray = NdArray_subarray(array, (indices + i), 1);
+        NdArray_printShape(subarray);
+        NdArray_printArray(subarray);
+        NdArray_sub_free(&subarray);
+    }
+    printf("\n");
+
+    unsigned int position[3] = { 5, 1 };
+    NdArray *subarray = NdArray_subarray(array, position, 2);
+    NdArray_printShape(subarray);
+    NdArray_printArray(subarray);
+    NdArray_sub_free(&subarray);
+
+    NdArray_free(&array);
+}
+
 int main() {
     test("test_ndarray_new", test_ndarray_new);
     test("test_ndarray_new_with_data", test_ndarray_new_with_data);
@@ -413,5 +436,6 @@ int main() {
     test("test_ndarray_matul_float", test_ndarray_matmul_float);
     test("test_ndarray_dot_float", test_ndarray_dot_float);
     test("test_ndarray_operations", test_ndarray_operations);
+    test("test_ndarray_subarray", test_ndarray_subarray);
     return 0;
 }
