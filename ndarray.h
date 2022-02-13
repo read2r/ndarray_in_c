@@ -61,6 +61,22 @@ void NdArray_mul_scalar(NdArray *ndarray, double value);
 void NdArray_div_scalar(NdArray *ndarray, double value);
 //void NdArray_mod_scalar(NdArray *ndarray, int value);
 
+int NdArray_sum_int(NdArray *ndarray);
+double NdArray_sum_double(NdArray *ndarray);
+void* NdArray_sum(NdArray *ndarray);
+
+int NdArray_max_int(NdArray *ndarray);
+double NdArray_max_double(NdArray *ndarray);
+void* NdArray_max(NdArray *ndarray);
+
+int NdArray_min_int(NdArray *ndarray);
+double NdArray_min_double(NdArray *ndarray);
+void* NdArray_min(NdArray *ndarray);
+
+double NdArray_mean_int(NdArray *ndarray);
+double NdArray_mean_double(NdArray *ndarray);
+void* NdArray_mean(NdArray *ndarray);
+
 void NdArray_broadcast(NdArray *ndarray, broadcast_func bfunc);
 
 #endif

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 #include "ndarray.h"
 #include "ndshape.h"
 
@@ -82,8 +83,9 @@ NdArray* NdArray_ones(unsigned int len, DataType datatype) {
 }
 
 NdArray* NdArray_arange(unsigned int start, unsigned int end, DataType datatype) {
-    NdArray *ndarray = NdArray_zeros(end - start, datatype);
-    for(int i = 0; i < end - start; i++) {
+    int len = end - start;
+    NdArray *ndarray = NdArray_zeros(len, datatype);
+    for(int i = 0; i < len; i++) {
         switch(datatype) {
         case DT_INT:
             *((int*)ndarray->data + i) = start + i;
@@ -602,4 +604,108 @@ void NdArray_broadcast(NdArray *ndarray, broadcast_func bfunc) {
         }
         ptr_data += ndarray->item_size;
     }
+}
+
+int NdArray_sum_int(NdArray *ndarray) {
+    int *data = (int *)ndarray->data;
+    int sum = 0;
+    for(int i = 0; i < ndarray->shape->len; i++) {
+        sum += data[i];
+    }
+    return sum;
+}
+
+double NdArray_sum_double(NdArray *ndarray) {
+    double *data = (double*)ndarray->data;
+    double sum = 0;
+    for(int i = 0; i < ndarray->shape->len; i++) {
+        sum += data[i];
+    }
+    return sum;
+}
+
+void* NdArray_sum(NdArray *ndarray) {
+    void *ptr_sum = malloc(ndarray->item_size);
+    if(ndarray->datatype == DT_INT) {
+        *(int*)ptr_sum = NdArray_sum_int(ndarray);
+    } else if(ndarray->datatype == DT_DOUBLE) {
+        *(double*)ptr_sum = NdArray_sum_double(ndarray);
+    }
+    return ptr_sum;
+}
+
+int NdArray_max_int(NdArray *ndarray) {
+    int *data = (int*)ndarray->data;
+    int max = data[0];
+    for(int i = 1; i < ndarray->shape->len; i++) {
+        max = (max < data[i]) ? data[i] : max;
+    }
+    return max;
+}
+double NdArray_max_double(NdArray *ndarray) {
+    double *data = (double*)ndarray->data;
+    double max = data[0];
+    for(int i = 1; i < ndarray->shape->len; i++) {
+        max = (max < data[i]) ? data[i] : max;
+    }
+    return max;
+}
+void* NdArray_max(NdArray *ndarray) {
+    void *ptr_max = malloc(ndarray->item_size);
+    if(ndarray->datatype == DT_INT) {
+        *(int*)ptr_max = NdArray_max_int(ndarray);
+    } else if(ndarray->datatype == DT_DOUBLE) {
+        *(double*)ptr_max = NdArray_max_double(ndarray);
+    }
+    return ptr_max;
+}
+
+int NdArray_min_int(NdArray *ndarray) {
+    int *data = (int*)ndarray->data;
+    int min = data[0];
+    for(int i = 1; i < ndarray->shape->len; i++) {
+        min = (min > data[i]) ? data[i] : min;
+    }
+    return min;
+}
+
+double NdArray_min_double(NdArray *ndarray) {
+    double *data = (double*)ndarray->data;
+    double min = data[0];
+    for(int i = 1; i < ndarray->shape->len; i++) {
+        min = (min > data[i]) ? data[i] : min;
+    }
+    return min;
+}
+
+void* NdArray_min(NdArray *ndarray) {
+    void *ptr_min = malloc(ndarray->item_size);
+    if(ndarray->datatype == DT_INT) {
+        *(int*)ptr_min = NdArray_min_int(ndarray);
+    } else if(ndarray->datatype == DT_DOUBLE) {
+        *(double*)ptr_min = NdArray_min_double(ndarray);
+    }
+    return ptr_min;
+}
+
+double NdArray_mean_int(NdArray *ndarray) {
+    int *data = (int*)ndarray->data;
+    double mean = (double)NdArray_sum_int(ndarray) / ndarray->shape->len;
+    return mean;
+}
+
+double NdArray_mean_double(NdArray *ndarray) {
+    double *data = (double*)ndarray->data;
+    double mean = NdArray_sum_double(ndarray) / ndarray->shape->len;
+    return mean;
+}
+
+void* NdArray_mean(NdArray *ndarray) {
+    void *ptr_mean = malloc(ndarray->item_size);
+    if(ndarray->datatype == DT_INT) {
+        *(int*)ptr_mean = NdArray_mean_int(ndarray);
+    } else if(ndarray->datatype == DT_DOUBLE) {
+        *(double*)ptr_mean = NdArray_mean_double(ndarray);
+    }
+    return ptr_mean;
 }

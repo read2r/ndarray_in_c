@@ -424,6 +424,27 @@ void test_ndarray_subarray() {
     NdArray_free(&array);
 }
 
+void test_ndarray() {
+    int*ptr_value;
+    NdArray *array = NdArray_arange(1, 11, DT_INT);
+
+    ptr_value = NdArray_sum(array);
+    printf("%d\n", *ptr_value);
+    free(ptr_value);
+
+    ptr_value = NdArray_max(array);
+    printf("%d\n", *ptr_value);
+    free(ptr_value);
+
+    ptr_value = NdArray_min(array);
+    printf("%d\n", *ptr_value);
+    free(ptr_value);
+
+    ptr_value = NdArray_mean(array);
+    printf("%d\n", *ptr_value);
+    free(ptr_value);
+}
+
 int main() {
     test("test_ndarray_new", test_ndarray_new);
     test("test_ndarray_new_with_data", test_ndarray_new_with_data);
@@ -437,5 +458,9 @@ int main() {
     test("test_ndarray_dot_float", test_ndarray_dot_float);
     test("test_ndarray_operations", test_ndarray_operations);
     test("test_ndarray_subarray", test_ndarray_subarray);
+
+    test_ndarray();
+    NdArray *random = NdArray_random(60000, 100, DT_INT);
+    NdArray_printArray(random);
     return 0;
 }
