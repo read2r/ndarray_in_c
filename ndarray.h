@@ -30,6 +30,9 @@ void NdArray_sub_free(NdArray **dptr_ndarray);
 NdArray* NdArray_zeros(unsigned int len, DataType datatype);
 NdArray* NdArray_ones(unsigned int len, DataType datatype);
 NdArray* NdArray_arange(unsigned int start, unsigned int end, DataType datatype);
+NdArray* NdArray_random(unsigned int len, DataType datatype);
+NdArray* NdArray_random_range(unsigned int len, unsigned int low, unsigned int high, DataType datatype);
+NdArray* NdArray_choice(unsigned int pick_len, unsigned int len, DataType datatype);
 
 // reshape ndarray
 int NdArray_reshape(NdArray *ndarray, NdShape *ndshape);
@@ -46,7 +49,9 @@ void NdArray_printShape(NdArray *ndarray);
 // matrix operations
 NdArray* NdArray_dot(NdArray *a, NdArray *b);
 NdArray* NdArray_matmul(NdArray *a, NdArray *b);
-int NdArray_transpose(NdArray *ndarray); // Not yet implemented
+NdArray* NdArray_transpose(NdArray *ndarray); // Not yet implemented
+
+NdArray* NdArray_suffle(NdArray *array);
 
 int NdArray_add(NdArray *dest, NdArray *src);
 int NdArray_sub(NdArray *dest, NdArray *src);
@@ -76,6 +81,9 @@ void* NdArray_min(NdArray *ndarray);
 double NdArray_mean_int(NdArray *ndarray);
 double NdArray_mean_double(NdArray *ndarray);
 void* NdArray_mean(NdArray *ndarray);
+
+int NdArray_argmax(NdArray *ndarray);
+int NdArray_argmin(NdArray *ndarray);
 
 void NdArray_broadcast(NdArray *ndarray, broadcast_func bfunc);
 

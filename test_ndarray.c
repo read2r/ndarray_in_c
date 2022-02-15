@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include "tester.h"
 #include "ndarray.h"
@@ -424,8 +425,9 @@ void test_ndarray_subarray() {
     NdArray_free(&array);
 }
 
-void test_ndarray() {
+void test_ndarray_operations2() {
     int*ptr_value;
+    int idx;
     NdArray *array = NdArray_arange(1, 11, DT_INT);
 
     ptr_value = NdArray_sum(array);
@@ -433,16 +435,55 @@ void test_ndarray() {
     free(ptr_value);
 
     ptr_value = NdArray_max(array);
-    printf("%d\n", *ptr_value);
+    idx = NdArray_argmax(array);
+    printf("[%d] %d\n", idx, *ptr_value);
     free(ptr_value);
 
     ptr_value = NdArray_min(array);
-    printf("%d\n", *ptr_value);
+    idx = NdArray_argmin(array);
+    printf("[%d] %d\n", idx, *ptr_value);
     free(ptr_value);
 
     ptr_value = NdArray_mean(array);
     printf("%d\n", *ptr_value);
     free(ptr_value);
+    printf("\n");
+}
+
+void test_ndarray_random() {
+    NdArray *array_int = NdArray_random(10, DT_INT);
+    NdArray *array_double = NdArray_random(10, DT_DOUBLE);
+    NdArray_printArray(array_int);
+    NdArray_printArray(array_double);
+
+    sleep(1);
+
+    NdArray *array_int_range = NdArray_random_range(20, 0, 10, DT_INT);
+    NdArray *array_double_range = NdArray_random_range(20, 0, 10, DT_DOUBLE);
+    NdArray_printArray(array_int_range);
+    NdArray_printArray(array_double_range);
+
+    NdArray_free(&array_int_range);
+    NdArray_free(&array_double_range);
+
+    array_int_range = NdArray_random_range(10, 30, 50, DT_INT);
+    array_double_range = NdArray_random_range(10, 30, 50, DT_DOUBLE);
+    NdArray_printArray(array_int_range);
+    NdArray_printArray(array_double_range);
+
+    NdShape *shape_random = NdShape_new(2, 100, 784);
+    NdArray *array_random = NdArray_random(100 * 784, DT_DOUBLE);
+    NdArray_reshape(array_random, shape_random);
+    NdArray_printArray(array_random);
+    NdArray_printShape(array_random);
+}
+
+void test_ndarray_choice() {
+    NdArray *choice0 = NdArray_choice(100, 100, DT_INT);
+    NdArray_printArray(choice0);
+
+    NdArray *choice1 = NdArray_choice(100, 60000, DT_INT);
+    NdArray_printArray(choice1);
 }
 
 int main() {
@@ -458,9 +499,8 @@ int main() {
     test("test_ndarray_dot_float", test_ndarray_dot_float);
     test("test_ndarray_operations", test_ndarray_operations);
     test("test_ndarray_subarray", test_ndarray_subarray);
-
-    test_ndarray();
-    NdArray *random = NdArray_random(60000, 100, DT_INT);
-    NdArray_printArray(random);
+    test("test_ndarray_operations2 ", test_ndarray_operations2);
+    test("test_ndarray_random", test_ndarray_random);
+    test("test_ndarray_choice", test_ndarray_choice);
     return 0;
 }

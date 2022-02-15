@@ -100,6 +100,88 @@ NdArray* NdArray_arange(unsigned int start, unsigned int end, DataType datatype)
     return ndarray;
 }
 
+NdArray* NdArray_random(unsigned int len, DataType datatype) {
+    NdArray *ndarray = NdArray_zeros(len, datatype);
+    void* cur = ndarray->data;
+    srand(time(NULL));
+    for(int i = 0; i < ndarray->shape->len; i++) {
+        switch(datatype) {
+        case DT_INT:
+            *(int*)cur = rand();
+            break;
+        case DT_DOUBLE:
+            *(double*)cur = (double)rand() / (RAND_MAX - 10);
+            break;
+        default:
+            abort();
+        }
+        cur += ndarray->item_size;
+    }
+    return ndarray;
+}
+
+NdArray* NdArray_random_range(unsigned int len, unsigned int low, unsigned int high, DataType datatype) {
+    assert(len > 0);
+    assert(low < high);
+
+    NdArray *ndarray = NdArray_zeros(len, datatype);
+    void* cur = ndarray->data;
+    int bound = high - low;
+    srand(time(NULL));
+    for(int i = 0; i < ndarray->shape->len; i++) {
+        switch(datatype) {
+        case DT_INT:
+            *(int*)cur = rand() % bound + low;
+            break;
+        case DT_DOUBLE:
+            *(double*)cur = (double)rand() / (RAND_MAX) + rand() % bound + low;
+            break;
+        default:
+            abort();
+        }
+        cur += ndarray->item_size;
+    }
+    return ndarray;
+}
+
+NdArray* NdArray_shuffle(NdArray *array) {
+    srand(time(NULL));
+    for(int i = array->shape->len-1; i > 0; i--) {
+        int random_idx = rand() % i;
+        switch(array->datatype) {
+        case DT_INT:
+            {
+                int *cur = array->data;
+                int temp = cur[i];
+                cur[i] = cur[random_idx];
+                cur[random_idx] = temp;
+            }
+            break;
+        case DT_DOUBLE:
+            {
+                double *cur = array->data;
+                double temp = cur[i];
+                cur[i] = cur[random_idx];
+                cur[random_idx] = temp;
+            }
+            break;
+        default:
+            abort();
+        }
+    }
+    return array;
+}
+
+NdArray* NdArray_choice(unsigned int pick_len, unsigned int len, DataType datatype) {
+    assert(len >= pick_len );
+    NdArray* ret = NdArray_zeros(pick_len, datatype);
+    NdArray* temp = NdArray_arange(0, len, datatype);
+    NdArray_shuffle(temp);
+    memcpy(ret->data, temp->data, ret->size);
+    NdArray_free(&temp);
+    return ret;
+}
+
 int NdArray_reshape(NdArray *ndarray, NdShape *ndshape) {
     return NdShape_reshape(ndarray->shape, ndshape);
 }
@@ -326,6 +408,8 @@ int NdArray_div(NdArray *dest, NdArray *src) {
 }
 
 int NdArray_mod(NdArray *dest, NdArray *src) {
+    assert(dest->datatype != DT_DOUBLE || src->datatype != DT_DOUBLE);
+
     if(!NdShape_compare(dest->shape, src->shape)) {
         return 0;
     }
@@ -576,7 +660,9 @@ void NdArray_div_scalar(NdArray *ndarray, double value) {
 }
 
 void NdArray_mod_scalar(NdArray *ndarray, int value) {
+    assert(ndarray->datatype != DT_DOUBLE);
     assert(value != 0);
+
     void *ptr_data = ndarray->data;
     for(int i = 0; i < ndarray->shape->len; i++) {
         switch(ndarray->datatype) {
@@ -708,4 +794,80 @@ void* NdArray_mean(NdArray *ndarray) {
         *(double*)ptr_mean = NdArray_mean_double(ndarray);
     }
     return ptr_mean;
+}
+
+int NdArray_argmax_int(NdArray *ndarray) {
+    int *cur = ndarray->data;
+    int max = *cur;
+    unsigned int idx_max = 0;
+    for(int i = 0; i < ndarray->shape->len; i++) {
+        if(max < *cur) {
+            max = *cur;
+            idx_max = i;
+        }
+        cur++;
+    }
+    return idx_max;
+}
+
+int NdArray_argmax_double(NdArray *ndarray) {
+    double *cur = ndarray->data;
+    double  max = *cur;
+    unsigned int idx_max = 0;
+    for(int i = 0; i < ndarray->shape->len; i++) {
+        if(max < *cur) {
+            max = *cur;
+            idx_max = i;
+        }
+        cur++;
+    }
+    return idx_max;
+}
+
+int NdArray_argmax(NdArray *ndarray) {
+    void *cur = ndarray->data;
+    if(ndarray->datatype == DT_INT) {
+        return NdArray_argmax_int(ndarray);
+    } else if(ndarray->datatype == DT_DOUBLE) {
+        return NdArray_argmax_double(ndarray);
+    }
+    return -1;
+}
+
+int NdArray_argmin_int(NdArray *ndarray) {
+    int *cur = ndarray->data;
+    int min = *cur;
+    unsigned int idx_min = 0;
+    for(int i = 0; i < ndarray->shape->len; i++) {
+        if(min > *cur) {
+            min = *cur;
+            idx_min = i;
+        }
+        cur++;
+    }
+    return idx_min;
+}
+
+int NdArray_argmin_double(NdArray *ndarray) {
+    double *cur = ndarray->data;
+    double min = *cur;
+    unsigned int idx_min = 0;
+    for(int i = 0; i < ndarray->shape->len; i++) {
+        if(min > *cur) {
+            min = *cur;
+            idx_min = i;
+        }
+        cur++;
+    }
+    return idx_min;
+}
+
+int NdArray_argmin(NdArray *ndarray) {
+    void *cur = ndarray->data;
+    if(ndarray->datatype == DT_INT) {
+        return NdArray_argmin_int(ndarray);
+    } else if(ndarray->datatype == DT_DOUBLE) {
+        return NdArray_argmin_double(ndarray);
+    }
+    return -1;
 }
