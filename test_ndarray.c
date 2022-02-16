@@ -486,6 +486,17 @@ void test_ndarray_choice() {
     NdArray_printArray(choice1);
 }
 
+void test_ndarray_transpose() {
+    NdShape *shape = NdShape_new(4, 2, 3, 4, 5);
+    NdArray *array = NdArray_arange(0, 2 * 3 * 4 * 5, DT_INT);
+    NdArray_reshape(array, shape);
+
+    NdArray *transposed = NdArray_transpose(array);
+
+    NdArray_printArray(array);
+    NdArray_printArray(transposed);
+}
+
 int main() {
     test("test_ndarray_new", test_ndarray_new);
     test("test_ndarray_new_with_data", test_ndarray_new_with_data);
@@ -502,5 +513,6 @@ int main() {
     test("test_ndarray_operations2 ", test_ndarray_operations2);
     test("test_ndarray_random", test_ndarray_random);
     test("test_ndarray_choice", test_ndarray_choice);
+    test("test_ndarray_transpose", test_ndarray_transpose);
     return 0;
 }

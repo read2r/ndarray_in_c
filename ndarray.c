@@ -590,6 +590,40 @@ NdArray* NdArray_matmul(NdArray *a, NdArray *b) {
     return result;
 }
 
+void transpose_recursive(NdArray* array, NdArray *transposed, unsigned int *position, int dim) {
+    if(dim >= array->shape->dim) {
+        unsigned int tdim = transposed->shape->dim;
+        unsigned int position_transpose[tdim];
+        for(int i = 0; i < tdim; i++) {
+            position_transpose[i] = position[tdim-i-1];
+        }
+
+        unsigned int offset_array = get_offset(array, position, array->shape->dim);
+        unsigned int offset_transposed = get_offset(transposed, position_transpose, transposed->shape->dim);
+
+        void *cur_array = array->data + offset_array;
+        void *cur_transposed = transposed->data + offset_transposed;
+
+        memcpy(cur_transposed, cur_array, array->item_size);
+    }
+
+    for(int i = 0; i < array->shape->arr[dim]; i++) {
+        position[dim] = i;
+        transpose_recursive(array, transposed, position, dim+1);
+    }
+}
+
+NdArray* NdArray_transpose(NdArray *self) {
+    NdArray *transposed = NdArray_zeros(self->shape->len, self->datatype);
+    NdShape *shape_transposed = NdShape_reverse(self->shape);
+    NdArray_reshape(transposed, shape_transposed);
+
+    unsigned int position[self->shape->dim];
+    transpose_recursive(self, transposed, position, 0);
+
+    return transposed;
+}
+
 void NdArray_add_scalar(NdArray *ndarray, double value) {
     void *ptr_data = ndarray->data;
     for(int i = 0; i < ndarray->shape->len; i++) {
