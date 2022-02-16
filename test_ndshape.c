@@ -80,6 +80,17 @@ void test_shape_compare() {
     }
 }
 
+void test_shape_reversed() {
+    NdShape *shape = NdShape_new(4, 1, 2, 3, 4);
+    NdShape *reversed = NdShape_reverse(shape);
+
+    NdShape_print(shape);
+    NdShape_print(reversed);
+
+    NdShape_free(&shape);
+    NdShape_free(&reversed);
+}
+
 int main() {
     test("test_shape_empty", test_shape_empty);
     test("test_shape_set", test_shape_set);
@@ -88,5 +99,6 @@ int main() {
     test("test_shape_print", test_shape_print);
     test("test_shape_reshape", test_shape_reshape);
     test("test_shape_compare", test_shape_compare);
+    test("test_shape_reversed", test_shape_reversed);
     return 0;
 }

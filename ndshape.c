@@ -97,3 +97,18 @@ int NdShape_reshape(NdShape *dest, const NdShape *src) {
     dest = NdShape_copy(src);
     return 1;
 }
+
+NdShape* NdShape_reverse(NdShape *self) {
+    NdShape *reversed = NdShape_copy(self);
+    unsigned int *cur_start = reversed->arr;
+    unsigned int *cur_end = cur_start + reversed->dim - 1;
+    unsigned int temp;
+    for(int i = 0; i < reversed->dim / 2; i++) {
+        temp = *cur_start;
+        *cur_start = *cur_end;
+        *cur_end = temp;
+        cur_start++;
+        cur_end--;
+    }
+    return reversed;
+}

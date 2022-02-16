@@ -18,6 +18,8 @@ int NdShape_compareLength(NdShape *a, NdShape *b);
 int NdShape_compareShapeArray(NdShape *a, NdShape *b);
 int NdShape_compare(NdShape *a, NdShape *b);
 int NdShape_reshape(NdShape *dest, const NdShape *src);
+NdShape* NdShape_reverse(NdShape *self);
+//int NdShape_swapaxes();
 //unsigned int* NdShape_getShapeArray(const NdShape *ndshape);
 //unsigned int NdShape_getDimension(const NdShape *ndshape);
 //unsigned int NdShape_getLength(const NdShape *ndshape);
