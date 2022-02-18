@@ -14,6 +14,8 @@ size_t get_item_size(DataType datatype) {
     case DT_DOUBLE:
         return sizeof(double);
         break;
+    case DT_BOOL:
+        return sizeof(char);
     default:
         return -1;
     }
@@ -239,6 +241,8 @@ void print_element(NdArray *ndarray, unsigned int *position) {
     case DT_DOUBLE:
         printf("%f ", *(double*)ptr_element);
         break;
+    case DT_BOOL:
+        printf("%d ", *(char*)ptr_element);
     default:
         break;
     }
@@ -1020,4 +1024,116 @@ void NdArray_convert_type(NdArray **ptr_self, DataType datatype) {
     } else if(self->datatype == DT_DOUBLE && datatype == DT_INT) {
         _convert_datatype_from_double_to_int(ptr_self);
     }
+}
+
+int _compare_int(int a, int b) {
+    return a - b;
+}
+
+int _compare_double(double a, double b) {
+    double temp = a - b;
+    if(temp > 0) {
+        return 1;
+    } else if(temp < 0) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
+int _compare_element(const void *a, const void *b, DataType datatype) {
+    if(datatype == DT_INT) {
+        return _compare_int(*(int*)a, *(int*)b);
+    } else if(datatype == DT_DOUBLE) {
+        return _compare_double(*(double*)a, *(double*)b);
+    } else {
+        abort();
+    }
+}
+
+int _compare_element_scalar(const void *self, double value, DataType datatype) {
+    if(datatype == DT_INT) {
+        double temp = (double)(*(int*)self);
+        return _compare_double(temp, value);
+    } else if(datatype == DT_DOUBLE) {
+        return _compare_double(*(double*)self, value);
+    } else {
+        abort();
+    }
+}
+
+void _set_bool(void *cur, DataType datatype, int bool_value, CompareTag ct) {
+    if(ct == CT_GT && bool_value <= 0) {
+        memset(cur, 0, get_item_size(datatype));
+    } else if(ct == CT_GE && bool_value < 0) {
+        memset(cur, 0, get_item_size(datatype));
+    } else if(ct == CT_LT && bool_value >= 0) {
+        memset(cur, 0, get_item_size(datatype));
+    } else if(ct == CT_LE && bool_value > 0) {
+        memset(cur, 0, get_item_size(datatype));
+    } else if(ct == CT_EQ && bool_value != 0) {
+        memset(cur, 0, get_item_size(datatype));
+    } else {
+        *(char*)cur= 1;
+    }
+}
+
+NdArray* NdArray_compare(NdArray *a, NdArray *b, CompareTag ct) {
+    assert(a->shape->dim == b->shape->dim);
+    assert(a->shape->len == b->shape->len);
+    assert(a->datatype == b->datatype);
+
+    NdArray *result = NdArray_new(NULL, a->shape, DT_BOOL);
+
+    void *cur_a = a->data;
+    void *cur_b = b->data;
+    void *cur_result = result->data;
+
+    int bool_value = 0;
+    for(int i = 0; i < a->shape->len; i++) {
+        int bool_value = _compare_element(cur_a, cur_b, a->datatype);
+        _set_bool(cur_result, result->datatype, bool_value, ct);
+        cur_a += a->item_size;
+        cur_b += b->item_size;
+        cur_result += result->item_size;
+    }
+
+    return result;
+}
+
+NdArray* NdArray_compare_scalar(NdArray *self, double value, CompareTag ct) {
+    NdArray *result = NdArray_new(NULL, self->shape, DT_BOOL);
+
+    void *cur_self = self->data;
+    void *cur_result = result->data;
+
+    int bool_value = 0;
+    for(int i = 0; i < self->shape->len; i++) {
+        int bool_value = _compare_element_scalar(cur_self, value, self->datatype);
+        _set_bool(cur_result, result->datatype, bool_value, ct);
+        cur_self += self->item_size;
+        cur_result += result->item_size;
+    }
+
+    return result;
+}
+
+NdArray* NdArray_mask(NdArray *self, NdArray *mask) {
+    NdArray* result = NdArray_new(NULL, self->shape, self->datatype);
+
+    void* cur_self = self->data;
+    void* cur_mask = mask->data;
+    void* cur_result = result->data;
+
+    for(int i = 0; i < self->shape->len; i++) {
+        if(*(char*)cur_mask) {
+            memcpy(cur_result, cur_self, self->item_size);
+        }
+
+        cur_self += self->item_size;
+        cur_mask += mask->item_size;
+        cur_result += result->item_size;
+    }
+
+    return result;
 }

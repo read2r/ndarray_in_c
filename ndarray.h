@@ -2,15 +2,23 @@
 #define __ND_ARRAY_H__
 #include "ndshape.h"
 
-typedef struct tagNdArray NdArray;
+typedef struct _NdArray NdArray;
 
-typedef enum tagDataType {
+typedef enum _DataType {
     DT_INT,
-    DT_FLOAT,
     DT_DOUBLE,
+    DT_BOOL,
 } DataType;
 
-typedef struct tagNdArray {
+typedef enum _CompareTag {
+    CT_GT,
+    CT_GE,
+    CT_LT,
+    CT_LE,
+    CT_EQ,
+} CompareTag;
+
+typedef struct _NdArray {
     DataType datatype;
     NdShape *shape;
     unsigned int item_size;
@@ -49,7 +57,7 @@ void NdArray_printShape(NdArray *ndarray);
 // matrix operations
 NdArray* NdArray_dot(NdArray *a, NdArray *b);
 NdArray* NdArray_matmul(NdArray *a, NdArray *b);
-NdArray* NdArray_transpose(NdArray *ndarray); // Not yet implemented
+NdArray* NdArray_transpose(NdArray *ndarray);
 
 NdArray* NdArray_suffle(NdArray *array);
 
@@ -66,10 +74,18 @@ void NdArray_mul_scalar(NdArray *ndarray, double value);
 void NdArray_div_scalar(NdArray *ndarray, double value);
 //void NdArray_mod_scalar(NdArray *ndarray, int value);
 
+// g : graeter
+// ge : grater or equal
+// l : less
+// le : less or equal
+// e : equal
+NdArray* NdArray_compare(NdArray *a, NdArray *b, CompareTag ct);
+NdArray* NdArray_compare_scalar(NdArray *self, double value, CompareTag ct);
+NdArray* NdArray_mask(NdArray *self, NdArray* mask);
+
 int NdArray_sum_int(NdArray *ndarray);
 double NdArray_sum_double(NdArray *ndarray);
 void* NdArray_sum(NdArray *ndarray);
-
 NdArray* NdArray_sum_axis(NdArray *ndarray, unsigned int axis);
 
 int NdArray_max_int(NdArray *ndarray);

@@ -541,6 +541,90 @@ void test_ndarray_convert_datatype() {
     NdArray_printArray(array);
 }
 
+void test_ndarray_compare() {
+    NdArray *a = NdArray_arange(0, 20, DT_INT);
+    NdArray *b = NdArray_ones(20, DT_INT);
+    NdArray_mul_scalar(b, 10);
+
+    NdArray_printArray(a);
+    NdArray_printArray(b);
+    printf("\n");
+
+    NdArray *mask;
+    NdArray *result;
+
+    mask = NdArray_compare(a, b, CT_GT);
+    result = NdArray_mask(a, mask);
+    NdArray_printArray(result);
+    NdArray_free(&result);
+    NdArray_free(&mask);
+
+    mask = NdArray_compare(a, b, CT_GE);
+    result = NdArray_mask(a, mask);
+    NdArray_printArray(result);
+    NdArray_free(&result);
+    NdArray_free(&mask);
+
+    mask = NdArray_compare(a, b, CT_EQ);
+    result = NdArray_mask(a, mask);
+    NdArray_printArray(result);
+    NdArray_free(&result);
+    NdArray_free(&mask);
+
+    mask = NdArray_compare(a, b, CT_LE);
+    result = NdArray_mask(a, mask);
+    NdArray_printArray(result);
+    NdArray_free(&result);
+    NdArray_free(&mask);
+
+    mask = NdArray_compare(a, b, CT_LT);
+    result = NdArray_mask(a, mask);
+    NdArray_printArray(result);
+    NdArray_free(&result);
+    NdArray_free(&mask);
+}
+
+void test_ndarray_compare_scalar() {
+    NdArray *a = NdArray_arange(0, 20, DT_INT);
+    double s = 10;
+
+    NdArray_printArray(a);
+    printf("\n");
+
+    NdArray *mask;
+    NdArray *result;
+
+    mask = NdArray_compare_scalar(a, s, CT_GT);
+    result = NdArray_mask(a, mask);
+    NdArray_printArray(result);
+    NdArray_free(&result);
+    NdArray_free(&mask);
+
+    mask = NdArray_compare_scalar(a, s, CT_GE);
+    result = NdArray_mask(a, mask);
+    NdArray_printArray(result);
+    NdArray_free(&result);
+    NdArray_free(&mask);
+
+    mask = NdArray_compare_scalar(a, s, CT_EQ);
+    result = NdArray_mask(a, mask);
+    NdArray_printArray(result);
+    NdArray_free(&result);
+    NdArray_free(&mask);
+
+    mask = NdArray_compare_scalar(a, s, CT_LE);
+    result = NdArray_mask(a, mask);
+    NdArray_printArray(result);
+    NdArray_free(&result);
+    NdArray_free(&mask);
+
+    mask = NdArray_compare_scalar(a, s, CT_LT);
+    result = NdArray_mask(a, mask);
+    NdArray_printArray(result);
+    NdArray_free(&result);
+    NdArray_free(&mask);
+}
+
 int main() {
     test("test_ndarray_new", test_ndarray_new);
     test("test_ndarray_new_with_data", test_ndarray_new_with_data);
@@ -560,5 +644,7 @@ int main() {
     test("test_ndarray_transpose", test_ndarray_transpose);
     test("test_ndarray_sum_axis", test_ndarray_sum_axis);
     test("test_ndarray_convert_datatype", test_ndarray_convert_datatype);
+    test("test_ndarray_compare", test_ndarray_compare);
+    test("test_ndarray_compare_scalar", test_ndarray_compare_scalar);
     return 0;
 }
