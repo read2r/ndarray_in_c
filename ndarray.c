@@ -754,6 +754,79 @@ void* NdArray_sum(NdArray *ndarray) {
     return ptr_sum;
 }
 
+NdShape* get_ndshape_sum_axis(NdShape *self, unsigned int axis) {
+    NdShape *shape_sum = NdShape_empty(self->dim-1);
+    for(int i = 0; i < shape_sum->dim; i++) {
+        shape_sum->arr[i] = (i >= axis) ? self->arr[i+1] : self->arr[i];
+        shape_sum->len *= shape_sum->arr[i];
+    }
+    return shape_sum;
+}
+
+NdArray* get_ndarray_sum_axis(NdArray *self, unsigned int axis) {
+    NdShape *shape_self = self->shape;
+    NdShape *shape_sum = get_ndshape_sum_axis(self->shape, axis);
+    NdArray *array_sum = NdArray_new(NULL, shape_sum, self->datatype);
+    return array_sum;
+}
+
+unsigned int get_step_sum_axis(NdShape *self, unsigned int axis) {
+    unsigned int step = self->len;
+    for(int i = 0; i <= axis; i++) {
+        step /= self->arr[i];
+    }
+    return step;
+}
+
+NdArray* cal_array_sum_axis(NdArray *self, NdArray *result, unsigned int axis) {
+    unsigned int step = get_step_sum_axis(self->shape, axis);
+    unsigned int memo[self->shape->len];
+    for(int i = 0; i < self->shape->len; i++) {
+        memo[i] = 0;
+    }
+
+    void *cur = self->data;
+    void *cur_result = result->data;
+    void *sum = malloc(result->item_size);
+
+    printf("%d, %d, %d\n", self->shape->len, step, self->shape->arr[axis]);
+    for(int i = 0; i < self->shape->len; i++) {
+        if(memo[i] == 1) {
+            continue;
+        }
+
+        memset(sum, 0, result->item_size);
+        for(int j = 0; j < self->shape->arr[axis]; j++) {
+            int idx = i + j * step;
+            switch(result->datatype) {
+            case DT_INT:
+                *(int*)sum += *((int*)cur + idx);
+                break;
+            case DT_DOUBLE:
+                *(double*)sum += *((double*)cur + idx);
+                break;
+            default:
+                abort();
+            }
+            memo[idx] = 1;
+        }
+        memcpy(cur_result, sum, result->item_size);
+        cur_result += result->item_size;
+    }
+
+    free(sum);
+    return result;
+}
+
+NdArray* NdArray_sum_axis(NdArray *self, unsigned int axis) {
+    if(axis > self->shape->dim) {
+        return NULL;
+    }
+    NdArray* array_sum = get_ndarray_sum_axis(self, axis);
+    cal_array_sum_axis(self, array_sum, axis);
+    return array_sum;
+}
+
 int NdArray_max_int(NdArray *ndarray) {
     int *data = (int*)ndarray->data;
     int max = data[0];
@@ -904,4 +977,47 @@ int NdArray_argmin(NdArray *ndarray) {
         return NdArray_argmin_double(ndarray);
     }
     return -1;
+}
+
+void _convert_datatype_from_int_to_double(NdArray **ptr_self) {
+    NdArray *self = *ptr_self;
+    NdArray *converted = NdArray_new(NULL, self->shape, DT_DOUBLE);
+
+    int* cur_self = self->data;
+    double* cur_conv = converted->data;
+
+    for(int i = 0; i < converted->shape->len; i++) {
+        cur_conv[i] = (double)cur_self[i];
+    }
+
+    NdArray_free(&self);
+    *ptr_self = converted;
+}
+
+void _convert_datatype_from_double_to_int(NdArray **ptr_self) {
+    NdArray *self = *ptr_self;
+    NdArray *converted = NdArray_new(NULL, self->shape, DT_INT);
+
+    double* cur_self = self->data;
+    int* cur_conv = converted->data;
+
+    for(int i = 0; i < converted->shape->len; i++) {
+        cur_conv[i] = (int)cur_self[i];
+    }
+
+    NdArray_free(&self);
+    *ptr_self = converted;
+}
+
+void NdArray_convert_type(NdArray **ptr_self, DataType datatype) {
+    NdArray *self = *ptr_self;
+    if(self->datatype == datatype) {
+        return;
+    }
+
+    if(self->datatype == DT_INT && datatype == DT_DOUBLE) {
+        _convert_datatype_from_int_to_double(ptr_self);
+    } else if(self->datatype == DT_DOUBLE && datatype == DT_INT) {
+        _convert_datatype_from_double_to_int(ptr_self);
+    }
 }

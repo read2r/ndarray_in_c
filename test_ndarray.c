@@ -497,6 +497,50 @@ void test_ndarray_transpose() {
     NdArray_printArray(transposed);
 }
 
+void test_ndarray_sum_axis() {
+    NdShape *shape = NdShape_new(5, 2, 4, 7, 6, 5);
+    NdArray *array = NdArray_arange(0, 2 * 4 * 7 * 6 * 5, DT_INT);
+    NdArray_reshape(array, shape);
+    
+    NdArray *result;
+    result = NdArray_sum_axis(array, 0);
+    NdArray_printArray(result);
+    NdArray_printShape(result);
+    NdArray_free(&result);
+
+    result = NdArray_sum_axis(array, 1);
+    NdArray_printArray(result);
+    NdArray_printShape(result);
+    NdArray_free(&result);
+
+    result = NdArray_sum_axis(array, 2);
+    NdArray_printArray(result);
+    NdArray_printShape(result);
+    NdArray_free(&result);
+
+    result = NdArray_sum_axis(array, 3);
+    NdArray_printArray(result);
+    NdArray_printShape(result);
+    NdArray_free(&result);
+
+    result = NdArray_sum_axis(array, 4);
+    NdArray_printArray(result);
+    NdArray_printShape(result);
+    NdArray_free(&result);
+}
+
+void test_ndarray_convert_datatype() {
+    NdArray *array = NdArray_arange(0, 10, DT_INT);
+    NdArray_convert_type(&array, DT_INT);
+    NdArray_printArray(array);
+    NdArray_convert_type(&array, DT_DOUBLE);
+    NdArray_printArray(array);
+    NdArray_add_scalar(array, 0.1234);
+    NdArray_printArray(array);
+    NdArray_convert_type(&array, DT_INT);
+    NdArray_printArray(array);
+}
+
 int main() {
     test("test_ndarray_new", test_ndarray_new);
     test("test_ndarray_new_with_data", test_ndarray_new_with_data);
@@ -514,5 +558,7 @@ int main() {
     test("test_ndarray_random", test_ndarray_random);
     test("test_ndarray_choice", test_ndarray_choice);
     test("test_ndarray_transpose", test_ndarray_transpose);
+    test("test_ndarray_sum_axis", test_ndarray_sum_axis);
+    test("test_ndarray_convert_datatype", test_ndarray_convert_datatype);
     return 0;
 }

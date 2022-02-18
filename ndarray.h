@@ -5,7 +5,7 @@
 typedef struct tagNdArray NdArray;
 
 typedef enum tagDataType {
-    DT_INT = 1342,
+    DT_INT,
     DT_FLOAT,
     DT_DOUBLE,
 } DataType;
@@ -70,6 +70,8 @@ int NdArray_sum_int(NdArray *ndarray);
 double NdArray_sum_double(NdArray *ndarray);
 void* NdArray_sum(NdArray *ndarray);
 
+NdArray* NdArray_sum_axis(NdArray *ndarray, unsigned int axis);
+
 int NdArray_max_int(NdArray *ndarray);
 double NdArray_max_double(NdArray *ndarray);
 void* NdArray_max(NdArray *ndarray);
@@ -86,5 +88,6 @@ int NdArray_argmax(NdArray *ndarray);
 int NdArray_argmin(NdArray *ndarray);
 
 void NdArray_broadcast(NdArray *ndarray, broadcast_func bfunc);
+void NdArray_convert_type(NdArray **ptr_self, DataType datatype);
 
 #endif
