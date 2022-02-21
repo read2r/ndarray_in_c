@@ -57,13 +57,9 @@ void NdArray_sub_free(NdArray **dptr_ndarray) {
 }
 
 NdArray* NdArray_zeros(unsigned int len, DataType datatype) {
-    NdArray *ndarray = (NdArray*)malloc(sizeof(NdArray));
-    ndarray->shape = NdShape_new(1, len);
-    ndarray->datatype = datatype;
-    ndarray->item_size = get_item_size(ndarray->datatype);
-    ndarray->size = ndarray->item_size * ndarray->shape->len;
-    ndarray->data = malloc(ndarray->size);
-    memset(ndarray->data, 0, ndarray->size);
+    NdShape *ndshape = NdShape_new(1, len);
+    NdArray *ndarray = NdArray_new(NULL, ndshape, datatype);
+    NdShape_free(&ndshape);
     return ndarray;
 }
 
@@ -109,15 +105,15 @@ NdArray* NdArray_random(unsigned int len, DataType datatype) {
     for(int i = 0; i < ndarray->shape->len; i++) {
         switch(datatype) {
         case DT_INT:
-            *(int*)cur = rand();
+            *((int*)cur + i) = rand();
             break;
         case DT_DOUBLE:
-            *(double*)cur = (double)rand() / (RAND_MAX - 10);
+            *((double*)cur + i) = (double)rand() / (RAND_MAX - 10);
             break;
         default:
             abort();
         }
-        cur += ndarray->item_size;
+        //cur += ndarray->item_size;
     }
     return ndarray;
 }
@@ -133,15 +129,15 @@ NdArray* NdArray_random_range(unsigned int len, unsigned int low, unsigned int h
     for(int i = 0; i < ndarray->shape->len; i++) {
         switch(datatype) {
         case DT_INT:
-            *(int*)cur = rand() % bound + low;
+            *((int*)cur + i) = rand() % bound + low;
             break;
         case DT_DOUBLE:
-            *(double*)cur = (double)rand() / (RAND_MAX) + rand() % bound + low;
+            *((double*)cur + i) = (double)rand() / (RAND_MAX) + rand() % bound + low;
             break;
         default:
             abort();
         }
-        cur += ndarray->item_size;
+        //cur += ndarray->item_size;
     }
     return ndarray;
 }
@@ -176,12 +172,12 @@ NdArray* NdArray_shuffle(NdArray *array) {
 
 NdArray* NdArray_choice(unsigned int pick_len, unsigned int len, DataType datatype) {
     assert(len >= pick_len );
-    NdArray* ret = NdArray_zeros(pick_len, datatype);
+    NdArray* choices = NdArray_zeros(pick_len, datatype);
     NdArray* temp = NdArray_arange(0, len, datatype);
     NdArray_shuffle(temp);
-    memcpy(ret->data, temp->data, ret->size);
+    memcpy(choices->data, temp->data, choices->size);
     NdArray_free(&temp);
-    return ret;
+    return choices;
 }
 
 int NdArray_reshape(NdArray *ndarray, NdShape *ndshape) {
@@ -244,7 +240,7 @@ void print_element(NdArray *ndarray, unsigned int *position) {
     case DT_BOOL:
         printf("%d ", *(char*)ptr_element);
     default:
-        break;
+        abort();
     }
 }
 
@@ -263,7 +259,7 @@ void printArray(NdArray *ndarray, unsigned int *position, int dim) {
 }
 
 void NdArray_printArray(NdArray *ndarray) {
-    unsigned int *position = (unsigned int*)malloc(sizeof(unsigned int) * ndarray->shape->dim);
+    unsigned int position[ndarray->shape->dim];
     memset(position, 0, sizeof(unsigned int) * ndarray->shape->dim);
     printArray(ndarray, position, 0);
     printf("\n");
@@ -443,8 +439,8 @@ void dot_recursive(NdArray *result, NdArray *a, NdArray *b, unsigned int *positi
         NdShape *shape_a = a->shape;
         NdShape *shape_b = b->shape;
 
-        unsigned int *position_a = (unsigned int*)malloc(sizeof(unsigned int) * shape_a->dim);
-        unsigned int *position_b = (unsigned int*)malloc(sizeof(unsigned int) * shape_b->dim);
+        unsigned int position_a[shape_a->dim];
+        unsigned int position_b[shape_b->dim];
 
         memcpy(position_a, position, sizeof(unsigned int) * (shape_a->dim-1));
         memcpy(position_b, position + (shape_a->dim-1), sizeof(unsigned int) * (shape_b->dim-1));
@@ -485,8 +481,8 @@ void matmul_recursive(NdArray *result, NdArray *a, NdArray *b, unsigned int *pos
         NdShape *shape_a = a->shape;
         NdShape *shape_b = b->shape;
 
-        unsigned int *position_a = (unsigned int*)malloc(sizeof(unsigned int) * shape_a->dim);
-        unsigned int *position_b = (unsigned int*)malloc(sizeof(unsigned int) * shape_b->dim);
+        unsigned int position_a[shape_a->dim];
+        unsigned int position_b[shape_b->dim];
         
         int offset_a = (shape_a->dim >= shape_b->dim) ? 0 : shape_b->dim - shape_a->dim;
         int offset_b = (shape_a->dim >= shape_b->dim) ? shape_a->dim - shape_b->dim : 0;
@@ -548,7 +544,7 @@ NdArray* NdArray_dot(NdArray *a, NdArray *b) {
 
     result = NdArray_new(NULL, shape_result, datatype_result);
 
-    unsigned int *position = (unsigned int*)malloc(sizeof(unsigned int) * shape_result->dim);
+    unsigned int position[shape_result->dim];
     memset(position, 0, sizeof(unsigned int) * shape_result->dim);
 
     dot_recursive(result, a, b, position, 0);
@@ -586,9 +582,8 @@ NdArray* NdArray_matmul(NdArray *a, NdArray *b) {
     }
     result = NdArray_new(NULL, shape_result, datatype_result);
 
-    unsigned int *position = (unsigned int*)malloc(sizeof(unsigned int) * shape_result->dim);
-    memset(position, 0, shape_result->dim);
-    
+    unsigned int position[shape_result->dim];
+    memset(position, 0, sizeof(unsigned int) * shape_result->dim);
     matmul_recursive(result, a, b, position, 0);
 
     return result;
@@ -609,6 +604,8 @@ void transpose_recursive(NdArray* array, NdArray *transposed, unsigned int *posi
         void *cur_transposed = transposed->data + offset_transposed;
 
         memcpy(cur_transposed, cur_array, array->item_size);
+
+        return;
     }
 
     for(int i = 0; i < array->shape->arr[dim]; i++) {
@@ -618,12 +615,14 @@ void transpose_recursive(NdArray* array, NdArray *transposed, unsigned int *posi
 }
 
 NdArray* NdArray_transpose(NdArray *self) {
-    NdArray *transposed = NdArray_zeros(self->shape->len, self->datatype);
     NdShape *shape_transposed = NdShape_reverse(self->shape);
+    NdArray *transposed = NdArray_zeros(self->shape->len, self->datatype);
     NdArray_reshape(transposed, shape_transposed);
 
     unsigned int position[self->shape->dim];
     transpose_recursive(self, transposed, position, 0);
+
+    NdShape_free(&shape_transposed);
 
     return transposed;
 }
@@ -793,7 +792,6 @@ NdArray* cal_array_sum_axis(NdArray *self, NdArray *result, unsigned int axis) {
     void *cur_result = result->data;
     void *sum = malloc(result->item_size);
 
-    printf("%d, %d, %d\n", self->shape->len, step, self->shape->arr[axis]);
     for(int i = 0; i < self->shape->len; i++) {
         if(memo[i] == 1) {
             continue;

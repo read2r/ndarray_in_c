@@ -9,14 +9,22 @@
 void test_ndarray_new() {
     NdShape *shape = NdShape_new(2, 2, 2);
     NdArray *array = NdArray_new(NULL, shape, DT_INT);
+
     NdArray_printArray(array);
+
+    NdShape_free(&shape);
+    NdArray_free(&array);
 }
 
 void test_ndarray_new_with_data() {
     unsigned int data[2][2] = { {1, 2}, {3, 4} };
     NdShape *shape = NdShape_new(2, 2, 2);
     NdArray *array = NdArray_new(data, shape, DT_INT);
+
     NdArray_printArray(array);
+
+    NdShape_free(&shape);
+    NdArray_free(&array);
 }
 
 void test_ndarray_copy() {
@@ -24,10 +32,15 @@ void test_ndarray_copy() {
     NdShape *shape = NdShape_new(2, 2, 2);
     NdArray *array = NdArray_new(data, shape, DT_INT);
     NdArray *copied = NdArray_copy(array);
+
     printf("array : ");
     NdArray_printArray(array);
     printf("copied : ");
     NdArray_printArray(copied);
+
+    NdShape_free(&shape);
+    NdArray_free(&array);
+    NdArray_free(&copied);
 }
 
 void test_ndarray_aranges() {
@@ -41,6 +54,10 @@ void test_ndarray_aranges() {
     NdArray_printArray(array_ones);
     printf("arange : ");
     NdArray_printArray(array_arange);
+
+    NdArray_free(&array_zeros);
+    NdArray_free(&array_ones);
+    NdArray_free(&array_arange);
 }
 
 void test_ndarray_reshape() {
@@ -77,36 +94,53 @@ void test_ndarray_reshape() {
     printf("before reshaping array0 : ");
     NdArray_printShape(array0);
     NdArray_printArray(array0);
+    printf("\n");
     printf("after reshaping array0 : ");
     NdArray_reshape(array0, shape2);
     NdArray_printShape(array0);
     NdArray_printArray(array0);
-    printf("\n");
+    printf("\n\n");
 
     printf("before reshaping array1 : ");
     NdArray_printShape(array1);
     NdArray_printArray(array1);
     NdArray_reshape(array1, shape3);
+    printf("\n");
     printf("after reshaping array1 : ");
     NdArray_printShape(array1);
     NdArray_printArray(array1);
-    printf("\n");
+    printf("\n\n");
 
     printf("before reshaping array2 : ");
     NdArray_printShape(array2);
     NdArray_printArray(array2);
+    printf("\n");
     printf("after reshaping array1 to 2 dimesions array : ");
     NdArray_reshape(array2, shape4);
     NdArray_printShape(array2);
     NdArray_printArray(array2);
+    printf("\n");
     printf("after reshaping array1 to 3 dimesions array : ");
     NdArray_reshape(array2, shape5);
     NdArray_printShape(array2);
     NdArray_printArray(array2);
+    printf("\n");
     printf("after reshaping array1 to 5 dimesions array : ");
     NdArray_reshape(array2, shape6);
     NdArray_printShape(array2);
     NdArray_printArray(array2);
+
+    NdShape_free(&shape0);
+    NdShape_free(&shape1);
+    NdShape_free(&shape2);
+    NdShape_free(&shape3);
+    NdShape_free(&shape4);
+    NdShape_free(&shape5);
+    NdShape_free(&shape6);
+
+    NdArray_free(&array0);
+    NdArray_free(&array1);
+    NdArray_free(&array2);
 }
 
 void test_ndarray_get_set() {
@@ -121,10 +155,13 @@ void test_ndarray_get_set() {
     int new_value = -1;
     NdArray_setAt(array, position, &new_value);
     NdArray_printArray(array);
+
+    NdShape_free(&shape);
+    NdArray_free(&array);
 }
 
 void test_ndarray_matmul() {
-    NdShape *shape, *shape0, *shape1, *shape_result;
+    NdShape *shape, *shape0, *shape1;
     NdArray *array, *array0, *array1, *array_result;
 
     // simple matmul test.
@@ -136,6 +173,7 @@ void test_ndarray_matmul() {
     NdArray_printShape(array_result);
     NdArray_printArray(array_result);
 
+    NdShape_free(&shape);
     NdArray_free(&array);
     NdArray_free(&array_result);
 
@@ -153,6 +191,8 @@ void test_ndarray_matmul() {
     NdArray_printArray(array_result);
     NdArray_printShape(array_result);
 
+    NdShape_free(&shape0);
+    NdShape_free(&shape1);
     NdArray_free(&array0);
     NdArray_free(&array1);
     NdArray_free(&array_result);
@@ -171,6 +211,8 @@ void test_ndarray_matmul() {
     NdArray_printArray(array_result);
     NdArray_printShape(array_result);
 
+    NdShape_free(&shape0);
+    NdShape_free(&shape1);
     NdArray_free(&array0);
     NdArray_free(&array1);
     NdArray_free(&array_result);
@@ -189,13 +231,15 @@ void test_ndarray_matmul() {
     NdArray_printArray(array_result);
     NdArray_printShape(array_result);
 
+    NdShape_free(&shape0);
+    NdShape_free(&shape1);
     NdArray_free(&array0);
     NdArray_free(&array1);
     NdArray_free(&array_result);
 }
 
 void test_ndarray_dot() {
-    NdShape *shape, *shape0, *shape1, *shape_result;
+    NdShape *shape, *shape0, *shape1;
     NdArray *array, *array0, *array1, *array_result;
 
     // simple dot produect test.
@@ -207,6 +251,7 @@ void test_ndarray_dot() {
     NdArray_printShape(array_result);
     NdArray_printArray(array_result);
 
+    NdShape_free(&shape);
     NdArray_free(&array);
     NdArray_free(&array_result);
     
@@ -224,6 +269,8 @@ void test_ndarray_dot() {
     NdArray_printArray(array_result);
     NdArray_printShape(array_result);
 
+    NdShape_free(&shape0);
+    NdShape_free(&shape1);
     NdArray_free(&array0);
     NdArray_free(&array1);
     NdArray_free(&array_result);
@@ -242,6 +289,8 @@ void test_ndarray_dot() {
     NdArray_printArray(array_result);
     NdArray_printShape(array_result);
 
+    NdShape_free(&shape0);
+    NdShape_free(&shape1);
     NdArray_free(&array0);
     NdArray_free(&array1);
     NdArray_free(&array_result);
@@ -260,13 +309,15 @@ void test_ndarray_dot() {
     NdArray_printArray(array_result);
     NdArray_printShape(array_result);
 
+    NdShape_free(&shape0);
+    NdShape_free(&shape1);
     NdArray_free(&array0);
     NdArray_free(&array1);
     NdArray_free(&array_result);
 }
 
 void test_ndarray_matmul_float() {
-    NdShape *shape0, *shape1, *shape2, *shape3, *shape_result;
+    NdShape *shape0, *shape1, *shape2, *shape3;
     NdArray *array0, *array1, *array2, *array3, *array_result;
 
     double data0[2][2] = { {1.0, 1.1}, {2.0, 2.1} };
@@ -296,10 +347,20 @@ void test_ndarray_matmul_float() {
     array_result = NdArray_matmul(array2, array3);
     NdArray_printArray(array_result);
     NdArray_printShape(array_result);
+
+    NdShape_free(&shape0);
+    NdShape_free(&shape1);
+    NdShape_free(&shape2);
+    NdShape_free(&shape3);
+    NdArray_free(&array0);
+    NdArray_free(&array1);
+    NdArray_free(&array2);
+    NdArray_free(&array3);
+    NdArray_free(&array_result);
 }
 
 void test_ndarray_dot_float() {
-    NdShape *shape0, *shape1, *shape2, *shape3, *shape_result;
+    NdShape *shape0, *shape1, *shape2, *shape3;
     NdArray *array0, *array1, *array2, *array3, *array_result;
 
     double data0[2][2] = { {1.0, 1.1}, {2.0, 2.1} };
@@ -329,6 +390,16 @@ void test_ndarray_dot_float() {
     array_result = NdArray_dot(array2, array3);
     NdArray_printArray(array_result);
     NdArray_printShape(array_result);
+
+    NdShape_free(&shape0);
+    NdShape_free(&shape1);
+    NdShape_free(&shape2);
+    NdShape_free(&shape3);
+    NdArray_free(&array0);
+    NdArray_free(&array1);
+    NdArray_free(&array2);
+    NdArray_free(&array3);
+    NdArray_free(&array_result);
 }
 
 void* sigmoid(void *ptr_x) {
@@ -400,16 +471,29 @@ void test_ndarray_operations() {
     printf("div : ");
     NdArray_printArray(array2);
     printf("\n");
+
+    NdShape_free(&shape2);
+    NdShape_free(&shape3);
+
+    NdArray_free(&array);
+    NdArray_free(&array0);
+    NdArray_free(&array1);
+    NdArray_free(&array2);
+    NdArray_free(&array3);
 }
 
 void test_ndarray_subarray() {
     NdShape *shape = NdShape_new(4, 10, 2, 3, 4);
     NdArray *array = NdArray_arange(0, 10 * 2 * 3 * 4, DT_INT);
     NdArray_reshape(array, shape);
+    NdArray_printArray(array);
+    printf("\n");
 
-    unsigned int indices[3] = { 0, 3, 9 };
+    NdArray *indices = NdArray_choice(3, 10, DT_INT);
     for(int i = 0; i < 3; i++) {
-        NdArray *subarray = NdArray_subarray(array, (indices + i), 1);
+        int *idx = ((int*)indices->data + i);
+        printf("[%d] >> ", *idx);
+        NdArray *subarray = NdArray_subarray(array, (unsigned int *)idx, 1);
         NdArray_printShape(subarray);
         NdArray_printArray(subarray);
         NdArray_sub_free(&subarray);
@@ -422,11 +506,13 @@ void test_ndarray_subarray() {
     NdArray_printArray(subarray);
     NdArray_sub_free(&subarray);
 
+    NdShape_free(&shape);
     NdArray_free(&array);
+    NdArray_free(&indices);
 }
 
 void test_ndarray_operations2() {
-    int*ptr_value;
+    int *ptr_value;
     int idx;
     NdArray *array = NdArray_arange(1, 11, DT_INT);
 
@@ -448,6 +534,8 @@ void test_ndarray_operations2() {
     printf("%d\n", *ptr_value);
     free(ptr_value);
     printf("\n");
+
+    NdArray_free(&array);
 }
 
 void test_ndarray_random() {
@@ -455,6 +543,8 @@ void test_ndarray_random() {
     NdArray *array_double = NdArray_random(10, DT_DOUBLE);
     NdArray_printArray(array_int);
     NdArray_printArray(array_double);
+    NdArray_free(&array_int);
+    NdArray_free(&array_double);
 
     sleep(1);
 
@@ -462,7 +552,6 @@ void test_ndarray_random() {
     NdArray *array_double_range = NdArray_random_range(20, 0, 10, DT_DOUBLE);
     NdArray_printArray(array_int_range);
     NdArray_printArray(array_double_range);
-
     NdArray_free(&array_int_range);
     NdArray_free(&array_double_range);
 
@@ -470,20 +559,26 @@ void test_ndarray_random() {
     array_double_range = NdArray_random_range(10, 30, 50, DT_DOUBLE);
     NdArray_printArray(array_int_range);
     NdArray_printArray(array_double_range);
+    NdArray_free(&array_int_range);
+    NdArray_free(&array_double_range);
 
     NdShape *shape_random = NdShape_new(2, 100, 784);
     NdArray *array_random = NdArray_random(100 * 784, DT_DOUBLE);
     NdArray_reshape(array_random, shape_random);
     NdArray_printArray(array_random);
     NdArray_printShape(array_random);
+    NdShape_free(&shape_random);
+    NdArray_free(&array_random);
 }
 
 void test_ndarray_choice() {
     NdArray *choice0 = NdArray_choice(100, 100, DT_INT);
     NdArray_printArray(choice0);
+    NdArray_free(&choice0);
 
     NdArray *choice1 = NdArray_choice(100, 60000, DT_INT);
     NdArray_printArray(choice1);
+    NdArray_free(&choice1);
 }
 
 void test_ndarray_transpose() {
@@ -495,6 +590,10 @@ void test_ndarray_transpose() {
 
     NdArray_printArray(array);
     NdArray_printArray(transposed);
+
+    NdShape_free(&shape);
+    NdArray_free(&array);
+    NdArray_free(&transposed);
 }
 
 void test_ndarray_sum_axis() {
@@ -507,38 +606,52 @@ void test_ndarray_sum_axis() {
     NdArray_printArray(result);
     NdArray_printShape(result);
     NdArray_free(&result);
+    printf("\n");
 
     result = NdArray_sum_axis(array, 1);
     NdArray_printArray(result);
     NdArray_printShape(result);
     NdArray_free(&result);
+    printf("\n");
 
     result = NdArray_sum_axis(array, 2);
     NdArray_printArray(result);
     NdArray_printShape(result);
     NdArray_free(&result);
+    printf("\n");
 
     result = NdArray_sum_axis(array, 3);
     NdArray_printArray(result);
     NdArray_printShape(result);
     NdArray_free(&result);
+    printf("\n");
 
     result = NdArray_sum_axis(array, 4);
     NdArray_printArray(result);
     NdArray_printShape(result);
     NdArray_free(&result);
+    printf("\n");
+
+    NdShape_free(&shape);
+    NdArray_free(&array);
 }
 
 void test_ndarray_convert_datatype() {
     NdArray *array = NdArray_arange(0, 10, DT_INT);
+
     NdArray_convert_type(&array, DT_INT);
     NdArray_printArray(array);
+
     NdArray_convert_type(&array, DT_DOUBLE);
     NdArray_printArray(array);
+
     NdArray_add_scalar(array, 0.1234);
     NdArray_printArray(array);
+
     NdArray_convert_type(&array, DT_INT);
     NdArray_printArray(array);
+
+    NdArray_free(&array);
 }
 
 void test_ndarray_compare() {
@@ -582,6 +695,9 @@ void test_ndarray_compare() {
     NdArray_printArray(result);
     NdArray_free(&result);
     NdArray_free(&mask);
+
+    NdArray_free(&a);
+    NdArray_free(&b);
 }
 
 void test_ndarray_compare_scalar() {
@@ -623,6 +739,8 @@ void test_ndarray_compare_scalar() {
     NdArray_printArray(result);
     NdArray_free(&result);
     NdArray_free(&mask);
+
+    NdArray_free(&a);
 }
 
 int main() {
