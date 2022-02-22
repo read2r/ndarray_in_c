@@ -40,6 +40,7 @@ NdArray* NdArray_ones(unsigned int len, DataType datatype);
 NdArray* NdArray_arange(unsigned int start, unsigned int end, DataType datatype);
 NdArray* NdArray_random(unsigned int len, DataType datatype);
 NdArray* NdArray_random_range(unsigned int len, unsigned int low, unsigned int high, DataType datatype);
+NdArray* NdArray_random_gaussian(unsigned int len);
 NdArray* NdArray_choice(unsigned int pick_len, unsigned int len, DataType datatype);
 
 // reshape ndarray

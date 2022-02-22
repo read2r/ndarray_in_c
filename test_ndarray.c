@@ -743,6 +743,12 @@ void test_ndarray_compare_scalar() {
     NdArray_free(&a);
 }
 
+void test_ndarray_random_gaussian() {
+    NdArray *array = NdArray_random_gaussian(10);
+    NdArray_printArray(array);
+    NdArray_free(&array);
+}
+
 int main() {
     test("test_ndarray_new", test_ndarray_new);
     test("test_ndarray_new_with_data", test_ndarray_new_with_data);
@@ -764,5 +770,6 @@ int main() {
     test("test_ndarray_convert_datatype", test_ndarray_convert_datatype);
     test("test_ndarray_compare", test_ndarray_compare);
     test("test_ndarray_compare_scalar", test_ndarray_compare_scalar);
+    test("test_ndarray_random_gaussian", test_ndarray_random_gaussian);
     return 0;
 }

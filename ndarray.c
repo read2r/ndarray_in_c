@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
+#include <math.h>
 #include "ndarray.h"
 #include "ndshape.h"
 
@@ -138,6 +139,29 @@ NdArray* NdArray_random_range(unsigned int len, unsigned int low, unsigned int h
             abort();
         }
         //cur += ndarray->item_size;
+    }
+    return ndarray;
+}
+
+double get_gaussian_random_value() {
+    double v1, v2, s;
+    do {
+        v1 = 2 * ((double) rand() / RAND_MAX) - 1;
+        v2 = 2 * ((double) rand() / RAND_MAX) - 1;
+        s = v1 * v1 + v2 * v2;
+    } while(s >= 1 || s == 0);
+
+    s = sqrt((-2 * log(s)) / s);
+
+    return v1 * s;
+}
+
+NdArray* NdArray_random_gaussian(unsigned int len) {
+    NdArray *ndarray = NdArray_zeros(len, DT_DOUBLE);
+    double *cur = ndarray->data;
+    srand(time(NULL));
+    for(int i = 0; i < len; i++) {
+        cur[i] = get_gaussian_random_value();
     }
     return ndarray;
 }
