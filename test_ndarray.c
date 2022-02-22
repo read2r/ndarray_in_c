@@ -749,6 +749,43 @@ void test_ndarray_random_gaussian() {
     NdArray_free(&array);
 }
 
+void test_ndarray_argmax_axis() {
+    NdShape *shape = NdShape_new(4, 2, 3, 4, 5);
+    NdArray *array = NdArray_arange(0, 2 * 3 * 4 * 5, DT_DOUBLE);
+    NdArray_reshape(array, shape);
+
+    //NdArray_printArray(array);
+    NdArray_printShape(array);
+    printf("\n");
+    
+    NdArray *result = NdArray_argmax_axis(array, 0);
+    NdArray_printArray(result);
+    NdArray_printShape(result);
+    NdArray_free(&result);
+    printf("\n");
+
+    result = NdArray_argmax_axis(array, 1);
+    NdArray_printArray(result);
+    NdArray_printShape(result);
+    NdArray_free(&result);
+    printf("\n");
+
+    result = NdArray_argmax_axis(array, 2);
+    NdArray_printArray(result);
+    NdArray_printShape(result);
+    NdArray_free(&result);
+    printf("\n");
+
+    result = NdArray_argmax_axis(array, 3);
+    NdArray_printArray(result);
+    NdArray_printShape(result);
+    NdArray_free(&result);
+    printf("\n");
+
+    NdShape_free(&shape);
+    NdArray_free(&array);
+}
+
 int main() {
     test("test_ndarray_new", test_ndarray_new);
     test("test_ndarray_new_with_data", test_ndarray_new_with_data);
@@ -771,5 +808,6 @@ int main() {
     test("test_ndarray_compare", test_ndarray_compare);
     test("test_ndarray_compare_scalar", test_ndarray_compare_scalar);
     test("test_ndarray_random_gaussian", test_ndarray_random_gaussian);
+    test("test_ndarray_argmax_axis", test_ndarray_argmax_axis);
     return 0;
 }
