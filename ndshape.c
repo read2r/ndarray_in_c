@@ -93,8 +93,11 @@ int NdShape_reshape(NdShape *dest, const NdShape *src) {
         return 0;
     }
 
-    NdShape_free(&dest);
-    dest = NdShape_copy(src);
+    dest->dim = src->dim;
+    dest->arr = realloc(dest->arr, sizeof(unsigned int) * src->len);
+    for(int i = 0; i < dest->dim; i++) {
+        dest->arr[i] = src->arr[i];
+    }
     return 1;
 }
 
