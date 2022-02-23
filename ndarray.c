@@ -263,6 +263,7 @@ void print_element(NdArray *ndarray, unsigned int *position) {
         break;
     case DT_BOOL:
         printf("%d ", *(char*)ptr_element);
+        break;
     default:
         abort();
     }
