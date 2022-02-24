@@ -791,10 +791,10 @@ NdShape* get_ndshape_axis(NdShape *self, unsigned int axis) {
     return shape_sum;
 }
 
-NdArray* get_ndarray_axis(NdArray *self, unsigned int axis) {
+NdArray* get_ndarray_axis(NdArray *self, unsigned int axis, DataType datatype) {
     NdShape *shape_self = self->shape;
     NdShape *shape_sum = get_ndshape_axis(self->shape, axis);
-    NdArray *array_sum = NdArray_new(NULL, shape_sum, self->datatype);
+    NdArray *array_sum = NdArray_new(NULL, shape_sum, datatype);
     return array_sum;
 }
 
@@ -892,21 +892,71 @@ NdArray* cal_array_argmax_axis(NdArray *self, NdArray *result, unsigned int axis
     return result;
 }
 
+NdArray* cal_array_max_axis(NdArray *self, NdArray *result, unsigned int axis) {
+    unsigned int step = get_step_axis(self->shape, axis);
+    unsigned int memo[self->shape->len];
+    for(int i = 0; i < self->shape->len; i++) {
+        memo[i] = 0;
+    }
+
+    void *cur = self->data;
+    void *cur_result = result->data;
+    void *max = malloc(self->item_size);
+
+    for(int i = 0; i < self->shape->len; i++) {
+        if(memo[i] == 1) {
+            continue;
+        }
+
+        memcpy(max, cur + i * self->item_size, self->item_size);
+        for(int j = 1; j < self->shape->arr[axis]; j++) {
+            int idx = i + j * step;
+            switch(self->datatype) {
+            case DT_INT:
+                if(*(int*)max < *((int*)cur + idx)) {
+                    *(int*)max = *((int*)cur + idx);
+                }
+                break;
+            case DT_DOUBLE:
+                if(*(double*)max < *((double*)cur + idx)) {
+                    *(double*)max = *((double*)cur + idx);
+                }
+                break;
+            default:
+                abort();
+            }
+            memo[idx] = 1;
+        }
+        memcpy(cur_result, max, result->item_size);
+        cur_result += result->item_size;
+    }
+
+    return result;
+}
+
 NdArray* NdArray_sum_axis(NdArray *self, unsigned int axis) {
     if(axis > self->shape->dim) {
         return NULL;
     }
-    NdArray *array_sum = get_ndarray_axis(self, axis);
+    NdArray *array_sum = get_ndarray_axis(self, axis, self->datatype);
     cal_array_sum_axis(self, array_sum, axis);
     return array_sum;
+}
+
+NdArray* NdArray_max_axis(NdArray *self, unsigned int axis) {
+    if(axis > self->shape->dim) {
+        return NULL;
+    }
+    NdArray *array_max = get_ndarray_axis(self, axis, self->datatype);
+    cal_array_max_axis(self, array_max, axis);
+    return array_max;
 }
 
 NdArray* NdArray_argmax_axis(NdArray *self, unsigned int axis) {
     if(axis > self->shape->dim) {
         return NULL;
     }
-    NdShape *shape_argmax = get_ndshape_axis(self->shape, axis);
-    NdArray *array_argmax = NdArray_new(NULL, shape_argmax, DT_INT);
+    NdArray *array_argmax = get_ndarray_axis(self, axis, DT_INT);
     cal_array_argmax_axis(self, array_argmax, axis);
     return array_argmax;
 }

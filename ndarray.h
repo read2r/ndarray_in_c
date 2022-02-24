@@ -89,6 +89,7 @@ double NdArray_sum_double(NdArray *ndarray);
 void* NdArray_sum(NdArray *ndarray);
 
 NdArray* NdArray_sum_axis(NdArray *ndarray, unsigned int axis);
+NdArray* NdArray_max_axis(NdArray *self, unsigned int axis);
 NdArray* NdArray_argmax_axis(NdArray *self, unsigned int axis);
 
 int NdArray_max_int(NdArray *ndarray);
