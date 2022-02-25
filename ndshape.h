@@ -10,6 +10,7 @@ typedef struct tagNdShape {
 NdShape* NdShape_empty(unsigned int dim);
 NdShape* NdShape_set(NdShape *ndarray, unsigned int dim, ...);
 NdShape* NdShape_new(unsigned int dim, ...);
+NdShape* NdShape_new_array(unsigned int dim, unsigned int *arr);
 NdShape* NdShape_copy(const NdShape *src);
 void NdShape_free(NdShape **ptr_ndshape);
 void NdShape_print(NdShape *ndshape);

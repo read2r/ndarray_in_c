@@ -42,6 +42,16 @@ NdShape* NdShape_new(unsigned int dim, ...) {
     return ndshape;
 }
 
+NdShape* NdShape_new_array(unsigned int dim, unsigned int *arr) {
+    NdShape *ndshape = NdShape_empty(dim);
+    for(int i = 0; i < dim; i++) {
+        int temp = arr[i];
+        ndshape->arr[i] = temp;
+        ndshape->len *= temp;
+    }
+    return ndshape;
+}
+
 NdShape* NdShape_copy(const NdShape *src) {
     NdShape *dest = NdShape_empty(src->dim);
     for(int i = 0; i < src->dim; i++) {

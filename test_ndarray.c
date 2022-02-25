@@ -823,6 +823,18 @@ void test_ndarray_max_axis() {
     NdArray_free(&array);
 }
 
+void test_ndarray_reshape_variadic() {
+    NdArray *array = NdArray_arange(0, 12, DT_INT);
+    NdArray_printArray(array);
+    NdArray_printShape(array);
+
+    NdArray_reshape_variadic(array, 2, 3, 4);
+    NdArray_printArray(array);
+    NdArray_printShape(array);
+
+    NdArray_free(&array);
+}
+
 int main() {
     test("test_ndarray_new", test_ndarray_new);
     test("test_ndarray_new_with_data", test_ndarray_new_with_data);
@@ -847,5 +859,6 @@ int main() {
     test("test_ndarray_random_gaussian", test_ndarray_random_gaussian);
     test("test_ndarray_argmax_axis", test_ndarray_argmax_axis);
     test("test_ndarray_max_axis", test_ndarray_max_axis);
+    test("test_ndarray_reshape_variadic", test_ndarray_reshape_variadic);
     return 0;
 }

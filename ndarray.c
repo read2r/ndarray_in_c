@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <assert.h>
 #include <time.h>
 #include <math.h>
@@ -206,6 +207,46 @@ NdArray* NdArray_choice(unsigned int pick_len, unsigned int len, DataType dataty
 
 int NdArray_reshape(NdArray *ndarray, NdShape *ndshape) {
     return NdShape_reshape(ndarray->shape, ndshape);
+}
+
+int NdArray_reshape_fixed_array(NdArray *self, unsigned int dim, unsigned int *arr) {
+    return 1;
+}
+
+int NdArray_reshape_array(NdArray *self, unsigned int dim, unsigned int *arr) {
+    unsigned int len = 1;
+    for(int i = 0; i < dim; i++) {
+        len *= arr[i];
+    }
+
+    if(len != self->shape->len) {
+        return 0;
+    }
+
+    NdShape_free(&self->shape);
+    self->shape = NdShape_new_array(dim, arr);
+    return 1;
+}
+
+int NdArray_reshape_variadic(NdArray *self, unsigned int dim, ...) {
+    unsigned int arr[dim];
+    unsigned int len = 1;
+    va_list args;
+    va_start(args, dim);
+    for(int i = 0; i < dim; i++) {
+        unsigned int temp = va_arg(args, unsigned int);
+        arr[i] = temp;
+        len *= temp;
+    }
+    va_end(args);
+
+    if(len != self->shape->len) {
+        return 0;
+    }
+
+    NdShape_free(&self->shape);
+    self->shape = NdShape_new_array(dim, arr);
+    return 1;
 }
 
 unsigned int get_offset(NdArray *ndarray, unsigned int *position, int pdim) {
