@@ -224,7 +224,7 @@ int NdArray_reshape_array(NdArray *self, unsigned int dim, unsigned int *arr) {
     }
 
     NdShape_free(&self->shape);
-    self->shape = NdShape_new_array(dim, arr);
+    self->shape = NdShape_new_fixed_array(dim, arr);
     return 1;
 }
 
@@ -245,7 +245,7 @@ int NdArray_reshape_variadic(NdArray *self, unsigned int dim, ...) {
     }
 
     NdShape_free(&self->shape);
-    self->shape = NdShape_new_array(dim, arr);
+    self->shape = NdShape_new_fixed_array(dim, arr);
     return 1;
 }
 

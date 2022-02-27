@@ -4,75 +4,117 @@
 #include <stdarg.h>
 #include "ndshape.h"
 
-NdShape* NdShape_empty(unsigned int dim) {
-    NdShape *ndshape = (NdShape*)malloc(sizeof(NdShape));
-    ndshape->dim = dim;
-    ndshape->len = 1;
-    ndshape->arr = (unsigned int*)malloc(sizeof(unsigned int) * dim);
-    memset(ndshape->arr, 0, sizeof(unsigned int) * dim);
+unsigned int* _create_shape_arr(unsigned int dim) {
+    unsigned int *arr = (unsigned int*)malloc(sizeof(unsigned int) * dim);
+    return arr;
+}
+
+NdShape* _create_shape(unsigned int dim) {
+    NdShape* ndshape = (NdShape*)malloc(sizeof(NdShape));
+    ndshape->arr = _create_shape_arr(dim);
     return ndshape;
 }
 
-NdShape* NdShape_set(NdShape *ndshape, unsigned int dim, ...) {
-    if(ndshape->dim != dim) {
-        NdShape_free(&ndshape);
-        ndshape = NdShape_empty(dim);
-    }
-    va_list ap;
-    va_start(ap, dim);
+void _set_shape_dim(NdShape *self, unsigned int dim) {
+    self->dim = dim;
+}
+
+void _set_shape_arr_zeros(NdShape* self) {
+    memset(self->arr, 0, sizeof(unsigned int) * self->dim);
+}
+
+void _set_shape_arr_fixed_array(NdShape *self, unsigned int dim, unsigned int *arr) {
+    memcpy(self->arr, arr, sizeof(unsigned int) * self->dim);
+}
+
+void _set_shape_arr_fixed_array_reverse(NdShape *self, unsigned int dim, unsigned int *arr) {
+    unsigned int reversed_arr[dim];
     for(int i = 0; i < dim; i++) {
-        int temp = va_arg(ap, int);
-        ndshape->arr[i] = temp;
-        ndshape->len *= temp;
+        reversed_arr[i] = arr[dim-i-1];
     }
-    va_end(ap);
+    _set_shape_arr_fixed_array(self, dim, reversed_arr);
+}
+
+void _set_shape_arr_va_list(NdShape *self, unsigned int dim, va_list args) {
+    for(int i = 0; i < dim; i++) {
+        self->arr[i] = va_arg(args, unsigned int);
+    }
+}
+
+void _set_shape_len(NdShape *self) {
+    self->len = 1;
+    for(int i = 0; i < self->dim; i++) {
+        self->len *= self->arr[i];
+    }
+    self->len = (self->len != 0) ? self->len : 1;
+}
+
+NdShape* NdShape_empty(unsigned int dim) {
+    NdShape *ndshape = _create_shape(dim);
+    _set_shape_dim(ndshape, dim);
+    _set_shape_arr_zeros(ndshape);
+    _set_shape_len(ndshape);
+    return ndshape;
+}
+
+NdShape* NdShape_set_fixed_array(NdShape *self, unsigned int dim, unsigned int *arr) {
+    _set_shape_dim(self, dim);
+    _set_shape_arr_fixed_array(self, dim, arr);
+    _set_shape_len(self);
+    return self;
+}
+
+NdShape* NdShape_set_va_list(NdShape *self, unsigned int dim, va_list args) {
+    _set_shape_dim(self, dim);
+    _set_shape_arr_va_list(self, dim, args);
+    _set_shape_len(self);
+    return self;
+}
+
+NdShape* NdShape_set(NdShape *self, unsigned int dim, ...) {
+    va_list args;
+    va_start(args, dim);
+    NdShape_set_va_list(self, dim, args);
+    va_end(args);
+    return self;
+}
+
+NdShape* NdShape_new_fixed_array(unsigned int dim, unsigned int *arr) {
+    NdShape *ndshape = NdShape_empty(dim);
+    _set_shape_arr_fixed_array(ndshape, dim, arr);
+    _set_shape_len(ndshape);
     return ndshape;
 }
 
 NdShape* NdShape_new(unsigned int dim, ...) {
     NdShape *ndshape = NdShape_empty(dim);
-    va_list ap;
-    va_start(ap, dim);
-    for(int i = 0; i < dim; i++) {
-        int temp = va_arg(ap, int);
-        ndshape->arr[i] = temp;
-        ndshape->len *= temp;
-    }
-    va_end(ap);
-    return ndshape;
-}
-
-NdShape* NdShape_new_array(unsigned int dim, unsigned int *arr) {
-    NdShape *ndshape = NdShape_empty(dim);
-    for(int i = 0; i < dim; i++) {
-        int temp = arr[i];
-        ndshape->arr[i] = temp;
-        ndshape->len *= temp;
-    }
+    va_list args;
+    va_start(args, dim);
+    _set_shape_arr_va_list(ndshape, dim, args);
+    _set_shape_len(ndshape);
+    va_end(args);
     return ndshape;
 }
 
 NdShape* NdShape_copy(const NdShape *src) {
     NdShape *dest = NdShape_empty(src->dim);
-    for(int i = 0; i < src->dim; i++) {
-        dest->arr[i] = src->arr[i];
-        dest->len *= src->arr[i];
-    }
+    _set_shape_arr_fixed_array(dest, src->dim, src->arr);
+    _set_shape_len(dest);
     return dest;
 }
 
-void NdShape_free(NdShape **ptrshape) {
-    free((*ptrshape)->arr);
-    free(*ptrshape);
-    (*ptrshape)->arr= NULL;
-    *ptrshape= NULL;
+void NdShape_free(NdShape **ptr_shape) {
+    free((*ptr_shape)->arr);
+    free(*ptr_shape);
+    (*ptr_shape)->arr= NULL;
+    *ptr_shape= NULL;
 }
 
-void NdShape_print(NdShape *ndshape) {
+void NdShape_print(NdShape *self) {
     printf("( ");
-    for(int i = 0; i < ndshape->dim; i++) {
-        printf("%d", ndshape->arr[i]);
-        if(i < ndshape->dim-1) {
+    for(int i = 0; i < self->dim; i++) {
+        printf("%d", self->arr[i]);
+        if(i < self->dim-1) {
             printf(", ");
         }
     }
@@ -102,26 +144,13 @@ int NdShape_reshape(NdShape *dest, const NdShape *src) {
         fprintf(stderr, "lengthes of both must be same. (%d %d)\n", dest->len, src->len);
         return 0;
     }
-
-    dest->dim = src->dim;
-    dest->arr = realloc(dest->arr, sizeof(unsigned int) * src->len);
-    for(int i = 0; i < dest->dim; i++) {
-        dest->arr[i] = src->arr[i];
-    }
+    _set_shape_dim(dest, src->dim);
+    _set_shape_arr_fixed_array(dest, src->dim, src->arr);
     return 1;
 }
 
 NdShape* NdShape_reverse(NdShape *self) {
     NdShape *reversed = NdShape_copy(self);
-    unsigned int *cur_start = reversed->arr;
-    unsigned int *cur_end = cur_start + reversed->dim - 1;
-    unsigned int temp;
-    for(int i = 0; i < reversed->dim / 2; i++) {
-        temp = *cur_start;
-        *cur_start = *cur_end;
-        *cur_end = temp;
-        cur_start++;
-        cur_end--;
-    }
+    _set_shape_arr_fixed_array_reverse(reversed, self->dim, self->arr);
     return reversed;
 }
