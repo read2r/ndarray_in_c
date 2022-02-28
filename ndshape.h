@@ -21,6 +21,7 @@ void NdShape_free(NdShape **ptr_shape);
 void NdShape_print(NdShape *self);
 int NdShape_compare(NdShape *a, NdShape *b);
 int NdShape_reshape(NdShape *dest, const NdShape *src);
+int NdShape_reshape_fixed_array(NdShape *self, unsigned int dim, unsigned int *arr);
 NdShape* NdShape_reverse(NdShape *self);
 
 #endif

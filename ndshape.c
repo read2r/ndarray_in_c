@@ -41,12 +41,17 @@ void _set_shape_arr_va_list(NdShape *self, unsigned int dim, va_list args) {
     }
 }
 
-void _set_shape_len(NdShape *self) {
-    self->len = 1;
-    for(int i = 0; i < self->dim; i++) {
-        self->len *= self->arr[i];
+unsigned int _cal_shape_len(unsigned int dim, unsigned int *arr) {
+    unsigned int len = 1;
+    for(int i = 0; i < dim; i++) {
+        len *= arr[i];
     }
-    self->len = (self->len != 0) ? self->len : 1;
+    len = (len == 0) ? 1 : len;
+    return len;
+}
+
+void _set_shape_len(NdShape *self) {
+    self->len = _cal_shape_len(self->dim, self->arr);
 }
 
 NdShape* NdShape_empty(unsigned int dim) {
@@ -146,6 +151,17 @@ int NdShape_reshape(NdShape *dest, const NdShape *src) {
     }
     _set_shape_dim(dest, src->dim);
     _set_shape_arr_fixed_array(dest, src->dim, src->arr);
+    return 1;
+}
+
+int NdShape_reshape_fixed_array(NdShape *self, unsigned int dim, unsigned *arr) {
+    int len = _cal_shape_len(dim, arr);
+    if(self->len != len) {
+        fprintf(stderr, "lengthes of both must be same. (%d %d)\n", self->len, len);
+        return 0;
+    }
+    _set_shape_dim(self, dim);
+    _set_shape_arr_fixed_array(self, dim, arr);
     return 1;
 }
 

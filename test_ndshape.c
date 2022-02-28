@@ -66,6 +66,20 @@ void test_shape_reshape() {
     NdShape_testPrintShape(shape1);
 }
 
+void test_shape_reshape_fixed_array() {
+    NdShape *shape = NdShape_new(5, 2, 3, 4, 5, 6);
+    unsigned int dim = 3;
+    unsigned int arr[3] = {6, 10, 12};
+
+    printf("Before Reshape\n");
+    NdShape_testPrintShape(shape);
+
+    NdShape_reshape_fixed_array(shape, dim, arr);
+
+    printf("After Reshape\n");
+    NdShape_testPrintShape(shape);
+}
+
 void test_shape_compare() {
     NdShape *shape0 = NdShape_new(3, 3, 3, 3);
     NdShape *shape1 = NdShape_new(3, 3, 3, 2);
@@ -100,5 +114,6 @@ int main() {
     test("test_shape_reshape", test_shape_reshape);
     test("test_shape_compare", test_shape_compare);
     test("test_shape_reversed", test_shape_reversed);
+    test("test_shape_reshape_fixed_array", test_shape_reshape_fixed_array);
     return 0;
 }
