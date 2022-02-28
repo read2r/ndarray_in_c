@@ -45,7 +45,7 @@ NdArray* NdArray_choice(unsigned int pick_len, unsigned int len, DataType dataty
 
 // reshape ndarray
 int NdArray_reshape(NdArray *ndarray, NdShape *ndshape);
-int NdArray_reshape_array(NdArray *self, unsigned int dim, unsigned int *arr);
+int NdArray_reshape_fixed_array(NdArray *self, unsigned int dim, unsigned int *arr);
 int NdArray_reshape_variadic(NdArray *self, unsigned int dim, ...);
 
 // get, set element, ndarray
