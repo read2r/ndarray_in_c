@@ -86,8 +86,9 @@ NdArray* NdArray_compare(NdArray *a, NdArray *b, CompareTag ct);
 NdArray* NdArray_compare_scalar(NdArray *self, double value, CompareTag ct);
 NdArray* NdArray_mask(NdArray *self, NdArray* mask);
 
-int NdArray_sum_int(NdArray *ndarray);
-double NdArray_sum_double(NdArray *ndarray);
+long NdArray_sum_int(NdArray *ndarray);
+long NdArray_sum_char(NdArray *ndarray);
+long double NdArray_sum_double(NdArray *ndarray);
 void* NdArray_sum(NdArray *ndarray);
 
 NdArray* NdArray_sum_axis(NdArray *ndarray, unsigned int axis);

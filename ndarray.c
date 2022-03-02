@@ -770,18 +770,27 @@ void NdArray_broadcast(NdArray *ndarray, broadcast_func bfunc) {
     }
 }
 
-int NdArray_sum_int(NdArray *ndarray) {
-    int *data = (int *)ndarray->data;
-    int sum = 0;
+long NdArray_sum_char(NdArray *ndarray) {
+    char *data = (char*)ndarray->data;
+    long sum = 0;
     for(int i = 0; i < ndarray->shape->len; i++) {
         sum += data[i];
     }
     return sum;
 }
 
-double NdArray_sum_double(NdArray *ndarray) {
+long NdArray_sum_int(NdArray *ndarray) {
+    int *data = (int*)ndarray->data;
+    long sum = 0;
+    for(int i = 0; i < ndarray->shape->len; i++) {
+        sum += data[i];
+    }
+    return sum;
+}
+
+long double NdArray_sum_double(NdArray *ndarray) {
     double *data = (double*)ndarray->data;
-    double sum = 0;
+    long double sum = 0;
     for(int i = 0; i < ndarray->shape->len; i++) {
         sum += data[i];
     }
@@ -794,6 +803,10 @@ void* NdArray_sum(NdArray *ndarray) {
         *(int*)ptr_sum = NdArray_sum_int(ndarray);
     } else if(ndarray->datatype == DT_DOUBLE) {
         *(double*)ptr_sum = NdArray_sum_double(ndarray);
+    } else if(ndarray->datatype == DT_BOOL) {
+        *(char*)ptr_sum = NdArray_sum_char(ndarray);
+    } else {
+        abort();
     }
     return ptr_sum;
 }
