@@ -3,7 +3,7 @@
 
 #include <stdarg.h>
 
-typedef struct tagNdShape {
+typedef struct _NdShape {
     unsigned int dim;
     unsigned int len;
     unsigned int *arr;
