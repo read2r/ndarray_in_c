@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
+#include <omp.h>
+#include <sys/time.h>
 #include "tester.h"
 #include "ndarray.h"
 #include "ndshape.h"
@@ -836,29 +838,29 @@ void test_ndarray_reshape_variadic() {
 }
 
 int main() {
-    test("test_ndarray_new", test_ndarray_new);
-    test("test_ndarray_new_with_data", test_ndarray_new_with_data);
-    test("test_ndarray_copy", test_ndarray_copy);
-    test("test_ndarray_aranges", test_ndarray_aranges);
-    test("test_ndarray_reshape", test_ndarray_reshape);
-    test("test_ndarray_get_set", test_ndarray_get_set);
-    test("test_ndarray_matmul", test_ndarray_matmul);
-    test("test_ndarray_dot", test_ndarray_dot);
-    test("test_ndarray_matul_float", test_ndarray_matmul_float);
-    test("test_ndarray_dot_float", test_ndarray_dot_float);
-    test("test_ndarray_operations", test_ndarray_operations);
-    test("test_ndarray_subarray", test_ndarray_subarray);
-    test("test_ndarray_operations2 ", test_ndarray_operations2);
-    test("test_ndarray_random", test_ndarray_random);
-    test("test_ndarray_choice", test_ndarray_choice);
-    test("test_ndarray_transpose", test_ndarray_transpose);
-    test("test_ndarray_sum_axis", test_ndarray_sum_axis);
-    test("test_ndarray_convert_datatype", test_ndarray_convert_datatype);
-    test("test_ndarray_compare", test_ndarray_compare);
-    test("test_ndarray_compare_scalar", test_ndarray_compare_scalar);
-    test("test_ndarray_random_gaussian", test_ndarray_random_gaussian);
-    test("test_ndarray_argmax_axis", test_ndarray_argmax_axis);
-    test("test_ndarray_max_axis", test_ndarray_max_axis);
-    test("test_ndarray_reshape_variadic", test_ndarray_reshape_variadic);
+    //test("test_ndarray_new", test_ndarray_new);
+    //test("test_ndarray_new_with_data", test_ndarray_new_with_data);
+    //test("test_ndarray_copy", test_ndarray_copy);
+    //test("test_ndarray_aranges", test_ndarray_aranges);
+    //test("test_ndarray_reshape", test_ndarray_reshape);
+    //test("test_ndarray_get_set", test_ndarray_get_set);
+    //test("test_ndarray_matmul", test_ndarray_matmul);
+    //test("test_ndarray_dot", test_ndarray_dot);
+    //test("test_ndarray_matul_float", test_ndarray_matmul_float);
+    //test("test_ndarray_dot_float", test_ndarray_dot_float);
+    //test("test_ndarray_operations", test_ndarray_operations);
+    //test("test_ndarray_subarray", test_ndarray_subarray);
+    //test("test_ndarray_operations2 ", test_ndarray_operations2);
+    //test("test_ndarray_random", test_ndarray_random);
+    //test("test_ndarray_choice", test_ndarray_choice);
+    //test("test_ndarray_transpose", test_ndarray_transpose);
+    //test("test_ndarray_sum_axis", test_ndarray_sum_axis);
+    //test("test_ndarray_convert_datatype", test_ndarray_convert_datatype);
+    //test("test_ndarray_compare", test_ndarray_compare);
+    //test("test_ndarray_compare_scalar", test_ndarray_compare_scalar);
+    //test("test_ndarray_random_gaussian", test_ndarray_random_gaussian);
+    //test("test_ndarray_argmax_axis", test_ndarray_argmax_axis);
+    //test("test_ndarray_max_axis", test_ndarray_max_axis);
+    //test("test_ndarray_reshape_variadic", test_ndarray_reshape_variadic);
     return 0;
 }

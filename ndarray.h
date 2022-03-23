@@ -59,7 +59,15 @@ void NdArray_printShape(NdArray *ndarray);
 
 // matrix operations
 NdArray* NdArray_dot(NdArray *a, NdArray *b);
+//NdArray* NdArray_matmul_nn(NdArray *a, NdArray *b);
+//NdArray* NdArray_matmul_tn(NdArray *a, NdArray *b);
+//NdArray* NdArray_matmul_nt(NdArray *a, NdArray *b);
+//NdArray* NdArray_matmul_tt(NdArray *a, NdArray *b);
 NdArray* NdArray_matmul(NdArray *a, NdArray *b);
+//NdArray* NdArray_matmul_nn(NdArray *a, NdArray *b);
+//NdArray* NdArray_matmul_tn(NdArray *a, NdArray *b);
+//NdArray* NdArray_matmul_nt(NdArray *a, NdArray *b);
+//NdArray* NdArray_matmul_tt(NdArray *a, NdArray *b);
 NdArray* NdArray_transpose(NdArray *ndarray);
 
 NdArray* NdArray_suffle(NdArray *array);

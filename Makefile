@@ -1,5 +1,5 @@
 CC = gcc
-FLAG = -lm -g
+FLAG = -lm -fopenmp -g
 OBJS = test_ndarray.o ndarray.o ndshape.o tester.o
 TARGET = test_ndarray.out
 
