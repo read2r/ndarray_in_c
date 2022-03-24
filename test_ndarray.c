@@ -256,7 +256,7 @@ void test_ndarray_dot() {
     NdShape_free(&shape);
     NdArray_free(&array);
     NdArray_free(&array_result);
-    
+
     // two arrays dot product test, that have same N dimesions.
     shape0 = NdShape_new(4, 3, 3, 3, 6);
     shape1 = NdShape_new(4, 4, 4, 6, 4);
@@ -845,7 +845,7 @@ int main() {
     //test("test_ndarray_reshape", test_ndarray_reshape);
     //test("test_ndarray_get_set", test_ndarray_get_set);
     //test("test_ndarray_matmul", test_ndarray_matmul);
-    //test("test_ndarray_dot", test_ndarray_dot);
+    test("test_ndarray_dot", test_ndarray_dot);
     //test("test_ndarray_matul_float", test_ndarray_matmul_float);
     //test("test_ndarray_dot_float", test_ndarray_dot_float);
     //test("test_ndarray_operations", test_ndarray_operations);
