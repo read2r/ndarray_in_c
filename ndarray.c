@@ -672,7 +672,7 @@ NdArray* NdArray_matmul(NdArray *a, NdArray *b) {
         abort();
     }
 
-    if(a->shape->dim == 2 && a->shape->dim == 2) {
+    if(a->shape->dim == 2 && b->shape->dim == 2) {
         return matmul_2d(a, b);
     } else {
         return matmul_nd(a, b);
