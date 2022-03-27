@@ -69,6 +69,7 @@ NdArray* NdArray_matmul(NdArray *a, NdArray *b);
 //NdArray* NdArray_matmul_nt(NdArray *a, NdArray *b);
 //NdArray* NdArray_matmul_tt(NdArray *a, NdArray *b);
 NdArray* NdArray_transpose(NdArray *ndarray);
+NdArray* NdArray_transpose_axis(NdArray *self, int dim, ...);
 
 NdArray* NdArray_suffle(NdArray *array);
 

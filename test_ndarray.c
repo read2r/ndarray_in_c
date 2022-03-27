@@ -199,6 +199,8 @@ void test_ndarray_matmul() {
     NdArray_free(&array1);
     NdArray_free(&array_result);
 
+    return;
+
     // two arrays matmul test(1), that have different N dimesions.
     shape0 = NdShape_new(5, 3, 3, 3, 3, 10);
     shape1 = NdShape_new(3, 3, 10, 5);
@@ -592,6 +594,23 @@ void test_ndarray_transpose() {
 
     NdArray_printArray(array);
     NdArray_printArray(transposed);
+    NdArray_printShape(transposed);
+
+    NdShape_free(&shape);
+    NdArray_free(&array);
+    NdArray_free(&transposed);
+}
+
+void test_ndarray_transpose_axis() {
+    NdShape *shape = NdShape_new(4, 2, 3, 4, 5);
+    NdArray *array = NdArray_arange(0, 2 * 3 * 4 * 5, DT_INT);
+    NdArray_reshape(array, shape);
+
+    NdArray *transposed = NdArray_transpose_axis(array, 4, 2, 3, 0, 1);
+
+    NdArray_printArray(array);
+    NdArray_printArray(transposed);
+    NdArray_printShape(transposed);
 
     NdShape_free(&shape);
     NdArray_free(&array);
@@ -845,7 +864,7 @@ int main() {
     //test("test_ndarray_reshape", test_ndarray_reshape);
     //test("test_ndarray_get_set", test_ndarray_get_set);
     //test("test_ndarray_matmul", test_ndarray_matmul);
-    test("test_ndarray_dot", test_ndarray_dot);
+    //test("test_ndarray_dot", test_ndarray_dot);
     //test("test_ndarray_matul_float", test_ndarray_matmul_float);
     //test("test_ndarray_dot_float", test_ndarray_dot_float);
     //test("test_ndarray_operations", test_ndarray_operations);
@@ -854,6 +873,7 @@ int main() {
     //test("test_ndarray_random", test_ndarray_random);
     //test("test_ndarray_choice", test_ndarray_choice);
     //test("test_ndarray_transpose", test_ndarray_transpose);
+    //test("test_ndarray_transpose_axis", test_ndarray_transpose_axis);
     //test("test_ndarray_sum_axis", test_ndarray_sum_axis);
     //test("test_ndarray_convert_datatype", test_ndarray_convert_datatype);
     //test("test_ndarray_compare", test_ndarray_compare);

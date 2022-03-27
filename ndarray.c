@@ -691,7 +691,7 @@ NdArray* NdArray_matmul(NdArray *a, NdArray *b) {
     }
 }
 
-void transpose_recursive(NdArray* array, NdArray *transposed, unsigned int *position, int dim) {
+void transpose_recursive(NdArray *array, NdArray *transposed, unsigned int *position, int dim) {
     if(dim >= array->shape->dim) {
         unsigned int tdim = transposed->shape->dim;
         unsigned int position_transpose[tdim];
@@ -725,6 +725,56 @@ NdArray* NdArray_transpose(NdArray *self) {
     transpose_recursive(self, transposed, position, 0);
 
     NdShape_free(&shape_transposed);
+
+    return transposed;
+}
+
+void transpose_axis_recursive(NdArray *array, NdArray *transposed, unsigned int *position, unsigned int *args, int dim) {
+    if(dim >= array->shape->dim) {
+        unsigned int tdim = transposed->shape->dim;
+        unsigned int position_transpose[tdim];
+
+        for(int i = 0; i < tdim; i++) {
+            position_transpose[i] = position[args[i]];
+        }
+
+        unsigned int offset_array = get_offset(array, position, array->shape->dim);
+        unsigned int offset_transposed = get_offset(transposed, position_transpose, transposed->shape->dim);
+
+        void *cur_array = array->data + offset_array;
+        void *cur_transposed = transposed->data + offset_transposed;
+
+        memcpy(cur_transposed, cur_array, array->item_size);
+
+        return;
+    }
+
+    for(int i = 0; i < array->shape->arr[dim]; i++) {
+        position[dim] = i;
+        transpose_axis_recursive(array, transposed, position, args, dim+1);
+    }
+}
+
+NdArray* NdArray_transpose_axis(NdArray *self, int dim, ...) {
+    unsigned int arr[dim];
+
+    va_list args;
+    va_start(args, dim);
+    for(int i = 0; i < dim; i++) {
+        arr[i] = va_arg(args, int);
+    }
+    va_end(args);
+
+    unsigned int transposed_shape_data[dim];
+    for(int i = 0; i < dim; i++) {
+        transposed_shape_data[i] = self->shape->arr[arr[i]];
+    }
+
+    NdArray *transposed = NdArray_zeros(self->shape->len, self->datatype);
+    NdArray_reshape_fixed_array(transposed, dim, transposed_shape_data);
+
+    unsigned int position[self->shape->dim];
+    transpose_axis_recursive(self, transposed, position, arr, 0);
 
     return transposed;
 }
