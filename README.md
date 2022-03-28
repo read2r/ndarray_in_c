@@ -1,6 +1,7 @@
+
 # N-Dimentional Array in C
 
-Numpy의 N차원 배열(N-Dimentional Array)을 C언어로 모방한 개인 프로젝트입니다.
+Numpy의 다차원 배열(N-Dimentional Array)을 C언어로 모방한 개인 프로젝트입니다.
 
 ## 1. Array Attributes
 ### 1. 1 Struct memory layout
@@ -31,7 +32,18 @@ typedef struct _NdShape {
 * item_size : Bytes comsumed by a element of the array.
 * size : Total bytes comsumed by the elements of the array
 * data : Array of The elements.
-### 1.2 Functions
+
+### 1.2 NdShape Functions
+* NdShape_empty
+* NdShape_new
+* NdShape_set
+* NdShape_copy
+* NdShape_free
+* NdShape_print
+* NdShape_reshape
+* NdShape_reverse
+
+### 1.3 NdArray  Functions
 * NdArray_new
 * NdArray_copy
 * NdArray_free
@@ -76,7 +88,6 @@ typedef struct _NdShape {
 * NdArray_argmin_axis
 * NdArray_broadcast
 * NdArray_convert_type
-
 ## 2. Numpy Documentary
 https://numpy.org/doc/stable/reference/arrays.ndarray.html
 
